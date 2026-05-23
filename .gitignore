@@ -1,0 +1,25 @@
+# R project
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj.user
+
+# renv — keep lock file, ignore library
+renv/library/
+renv/staging/
+renv/sandbox/
+renv/.cache/
+
+# Large data — share separately
+cgi_project/data/raw/
+cgi_project/data/processed/
+
+# Generated outputs — reproducible from scripts
+cgi_project/output/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude internal
+.claude/
