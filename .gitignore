@@ -16,6 +16,7 @@ cgi_project/data/processed/
 
 # Generated outputs — reproducible from scripts
 cgi_project/output/
+cgi_project/Q&A/output/
 
 # OS
 .DS_Store
