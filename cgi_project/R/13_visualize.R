@@ -75,10 +75,9 @@ if (!is.null(prov_sf)) {
   # Static PNG
   p_choropleth <- ggplot(prov_sf_cgi) +
     geom_sf(aes(fill = CGI), colour = "white", linewidth = 0.4) +
-    scale_fill_viridis_c(name = "CGI",
-                         option = "C",
-                         limits = c(0.5, 0.7),
-                         oob    = scales::squish,
+    scale_fill_distiller(name   = "CGI",
+                         palette = "YlOrRd",
+                         direction = 1,
                          labels = scales::number_format(accuracy = 0.01)) +
     labs(title = "Care Gap Index by Province, 2035 Forecast",
          subtitle = "Higher = greater demand–supply–access pressure",
