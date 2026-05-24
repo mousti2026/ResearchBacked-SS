@@ -264,7 +264,7 @@ p_traj <- ggplot() +
     data    = traj_top3 %>% filter(year == 2035),
     aes(x = year, y = CGI, label = cell_label, colour = cell_label),
     size = 2.8, show.legend = FALSE,
-    nudge_x = 0.4, direction = "y", max.overlaps = 3
+    nudge_x = 0.5, direction = "y", max.overlaps = 12
   ) +
   scale_fill_manual(values = highlight_colors, guide = "none") +
   scale_colour_manual(
@@ -272,8 +272,9 @@ p_traj <- ggplot() +
     name   = NULL,
     breaks = grey9_labels   # only grey cells appear in legend
   ) +
-  scale_x_continuous(breaks = YEARS_ANALYSIS) +
-  scale_y_continuous(limits = c(0, 1.0),
+  scale_x_continuous(breaks = YEARS_ANALYSIS,
+                     expand = expansion(mult = c(0.02, 0.18))) +
+  scale_y_continuous(limits = c(0, NA),
                      labels = scales::number_format(accuracy = 0.01)) +
   labs(title    = "CGI Trajectories — Top 12 Hotspot Cells",
        subtitle = "Ribbon = 90% PI (top 3 highlighted); dashed = hotspot threshold (0.66)",
