@@ -59,25 +59,52 @@ if (nrow(sector_coverage) > 0) {
           collapse = ", ")
 }
 
-# ── Step 3: Apply M matrix — compute FTE_relevant per province × category × year
-# FTE_relevant_{p,s,t} = Σ_sector M[s,sector] × werkende_{p,sector,t}
-# tekort_relevant uses same M weights
-# share_55plus weighted by (share × werkende) to give a specialism-specific
-# workforce-age profile
-message("Computing FTE_relevant via M matrix...")
+# ── Step 3: Apply province-calibrated M matrix ────────────────────────────────
+# FTE_relevant_{p,s,t} = Σ_k M_prov[p,s,k] × werkende_{p,k,t}
+#
+# The fixed national M matrix assumes the same sector split for every province.
+# In practice, Utrecht / Noord-Holland have a much larger UMC share than average,
+# while rural provinces (Zeeland, Fryslân) are almost entirely zkh.
+# Using a blended province-calibrated M corrects this misalignment and ensures
+# that province-level SP1 tracks the DAAN province shortage rate (convergent validity).
+#
+# Blending method: M_prov[p,s,k] ∝ M[s,k] × actual_share[p,k]
+# (product of national specialism allocation × province sector FTE share)
+# Renormalised per (province, category) so shares sum to 1.
+message("Building province-calibrated M matrix (blending national M × province sector shares)...")
+
+# Actual sector FTE shares per province at base year (held fixed for all years)
+prov_sector_shares <- wf_dbc %>%
+  filter(year == YEAR_BASE) %>%
+  group_by(province) %>%
+  mutate(actual_share = werkende / sum(werkende, na.rm = TRUE)) %>%  # sector % within province
+  ungroup() %>%
+  select(province, sector, actual_share)
+
+# Blend and renormalise → M_prov: province × category × sector
+M_prov <- M_long %>%
+  left_join(prov_sector_shares, by = "sector",
+            relationship = "many-to-many") %>%          # M × province = expected m-to-m
+  mutate(blend = share * coalesce(actual_share, 0)) %>%  # product; 0 if sector absent
+  group_by(province, category) %>%
+  mutate(share_prov = ifelse(sum(blend) > 0,
+                             blend / sum(blend),         # renormalise to sum 1
+                             0)) %>%                     # degenerate: set all to 0
+  ungroup() %>%
+  select(province, category, sector, share_prov)
+
+message("Computing FTE_relevant via province-calibrated M matrix...")
 
 fte_panel <- wf_dbc %>%
-  # Join with M_long: each workforce row (province,sector,year) matched to
-  # all specialism categories that use that sector
-  inner_join(M_long, by = "sector",
-             relationship = "many-to-many") %>%  # expected: each sector row matches many categories
+  # Join M_prov on (province, sector) — now province-specific shares
+  inner_join(M_prov, by = c("province", "sector"),
+             relationship = "many-to-many") %>%
   group_by(province, category, year) %>%
   summarise(
-    fte_relevant        = sum(share * werkende,   na.rm = TRUE),
-    tekort_relevant     = sum(share * tekort,     na.rm = TRUE),
-    # Workforce-age: weighted average share_55plus (weight = share × werkende)
-    wt_sum              = sum(share * werkende,   na.rm = TRUE),
-    wt_55plus_num       = sum(share * werkende * share_55plus, na.rm = TRUE),
+    fte_relevant    = sum(share_prov * werkende,   na.rm = TRUE),
+    tekort_relevant = sum(share_prov * tekort,     na.rm = TRUE),
+    wt_sum          = sum(share_prov * werkende,   na.rm = TRUE),
+    wt_55plus_num   = sum(share_prov * werkende * share_55plus, na.rm = TRUE),
     .groups = "drop"
   ) %>%
   mutate(
