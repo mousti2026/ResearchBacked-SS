@@ -71,7 +71,7 @@ m_prov <- m_matrix %>%
             relationship = "many-to-many") %>%
   mutate(blend = share * coalesce(actual_share, 0)) %>%
   group_by(province, specialism) %>%
-  mutate(share_prov = if_else(sum(blend) > 0, blend / sum(blend), 0)) %>%
+  mutate(share_prov = ifelse(sum(blend) > 0, blend / sum(blend), 0)) %>%
   ungroup() %>%
   select(province, specialism, sector, share_prov)
 
