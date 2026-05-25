@@ -1,301 +1,301 @@
 province,specialism,DP2_norm
-Drenthe,Geriatrics & Elderly Care,0.8839349530739015
-Drenthe,Cardiology,0.6448484084388942
-Drenthe,Orthopedics,0.6209397539753935
-Drenthe,Ophthalmology,0.5970310995118927
-Drenthe,Neurology & Neurosurgery,0.5731224450483922
-Drenthe,Pulmonology,0.5492137905848914
-Drenthe,Urology,0.5492137905848914
-Drenthe,Cardiothoracic Surgery,0.5492137905848914
-Drenthe,Rheumatology,0.5253051361213906
-Drenthe,Internal Medicine,0.50139648165789
-Drenthe,Rehabilitation Medicine,0.50139648165789
-Drenthe,Audiology,0.50139648165789
-Drenthe,Oncology & Radiotherapy,0.50139648165789
-Drenthe,Gastroenterology & Hepatology,0.47748782719438915
-Drenthe,Pain Management & Anaesthesiology,0.47748782719438915
-Drenthe,Radiology & Interventional Radiology,0.45357917273088855
-Drenthe,General & Trauma Surgery,0.45357917273088855
-Drenthe,Dermatology & Allergology,0.4296705182673878
-Drenthe,Clinical Genetics,0.40576186380388707
-Drenthe,Plastic & Reconstructive Surgery,0.40576186380388707
-Drenthe,ENT,0.40576186380388707
-Drenthe,Psychiatry & Mental Health,0.3579445548768856
-Drenthe,Sports Medicine & Other,0.31012724594988417
-Drenthe,Gynecology & Obstetrics,0.2144926280958813
-Drenthe,Pediatrics,0.02322339238787553
+Drenthe,Geriatrics & Elderly Care,0.8917718836114845
+Drenthe,Cardiology,0.6688289127086133
+Drenthe,Orthopedics,0.6465346156183263
+Drenthe,Ophthalmology,0.6242403185280391
+Drenthe,Neurology & Neurosurgery,0.6019460214377521
+Drenthe,Pulmonology,0.5796517243474649
+Drenthe,Urology,0.5796517243474649
+Drenthe,Cardiothoracic Surgery,0.5796517243474649
+Drenthe,Rheumatology,0.5573574272571779
+Drenthe,Internal Medicine,0.5350631301668907
+Drenthe,Rehabilitation Medicine,0.5350631301668907
+Drenthe,Audiology,0.5350631301668907
+Drenthe,Oncology & Radiotherapy,0.5350631301668907
+Drenthe,Gastroenterology & Hepatology,0.5127688330766035
+Drenthe,Pain Management & Anaesthesiology,0.5127688330766035
+Drenthe,Radiology & Interventional Radiology,0.4904745359863166
+Drenthe,General & Trauma Surgery,0.4904745359863166
+Drenthe,Dermatology & Allergology,0.4681802388960294
+Drenthe,Clinical Genetics,0.44588594180574226
+Drenthe,Plastic & Reconstructive Surgery,0.44588594180574226
+Drenthe,ENT,0.44588594180574226
+Drenthe,Psychiatry & Mental Health,0.401297347625168
+Drenthe,Sports Medicine & Other,0.3567087534445938
+Drenthe,Gynecology & Obstetrics,0.26753156508344533
+Drenthe,Pediatrics,0.08917718836114845
 Flevoland,Geriatrics & Elderly Care,1
-Flevoland,Cardiology,0.7318971936334682
-Flevoland,Orthopedics,0.705086912996815
-Flevoland,Ophthalmology,0.6782766323601618
-Flevoland,Neurology & Neurosurgery,0.6514663517235086
-Flevoland,Pulmonology,0.6246560710868555
-Flevoland,Urology,0.6246560710868555
-Flevoland,Cardiothoracic Surgery,0.6246560710868555
-Flevoland,Rheumatology,0.5978457904502023
-Flevoland,Internal Medicine,0.571035509813549
-Flevoland,Rehabilitation Medicine,0.571035509813549
-Flevoland,Audiology,0.571035509813549
-Flevoland,Oncology & Radiotherapy,0.571035509813549
-Flevoland,Gastroenterology & Hepatology,0.5442252291768959
-Flevoland,Pain Management & Anaesthesiology,0.5442252291768959
-Flevoland,Radiology & Interventional Radiology,0.5174149485402427
-Flevoland,General & Trauma Surgery,0.5174149485402427
-Flevoland,Dermatology & Allergology,0.49060466790358953
-Flevoland,Clinical Genetics,0.46379438726693634
-Flevoland,Plastic & Reconstructive Surgery,0.46379438726693634
-Flevoland,ENT,0.46379438726693634
-Flevoland,Psychiatry & Mental Health,0.41017382599362995
-Flevoland,Sports Medicine & Other,0.3565532647203236
-Flevoland,Gynecology & Obstetrics,0.24931214217371084
-Flevoland,Pediatrics,0.034829897080485395
-Fryslân,Geriatrics & Elderly Care,0.7772080793555429
-Fryslân,Cardiology,0.5648032531501254
-Fryslân,Orthopedics,0.5435627705295836
-Fryslân,Ophthalmology,0.5223222879090418
-Fryslân,Neurology & Neurosurgery,0.5010818052885001
-Fryslân,Pulmonology,0.4798413226679583
-Fryslân,Urology,0.4798413226679583
-Fryslân,Cardiothoracic Surgery,0.4798413226679583
-Fryslân,Rheumatology,0.4586008400474166
-Fryslân,Internal Medicine,0.4373603574268748
-Fryslân,Rehabilitation Medicine,0.4373603574268748
-Fryslân,Audiology,0.4373603574268748
-Fryslân,Oncology & Radiotherapy,0.4373603574268748
-Fryslân,Gastroenterology & Hepatology,0.416119874806333
-Fryslân,Pain Management & Anaesthesiology,0.416119874806333
-Fryslân,Radiology & Interventional Radiology,0.3948793921857913
-Fryslân,General & Trauma Surgery,0.3948793921857913
-Fryslân,Dermatology & Allergology,0.37363890956524953
-Fryslân,Clinical Genetics,0.3523984269447078
-Fryslân,Plastic & Reconstructive Surgery,0.3523984269447078
-Fryslân,ENT,0.3523984269447078
-Fryslân,Psychiatry & Mental Health,0.30991746170362433
-Fryslân,Sports Medicine & Other,0.26743649646254075
-Fryslân,Gynecology & Obstetrics,0.1824745659803737
-Fryslân,Pediatrics,0.012550705016039679
-Gelderland,Geriatrics & Elderly Care,0.804087761659312
-Gelderland,Cardiology,0.5849630148779522
-Gelderland,Orthopedics,0.5630505401998162
-Gelderland,Ophthalmology,0.5411380655216802
-Gelderland,Neurology & Neurosurgery,0.5192255908435442
-Gelderland,Pulmonology,0.4973131161654082
-Gelderland,Urology,0.4973131161654082
-Gelderland,Cardiothoracic Surgery,0.4973131161654082
-Gelderland,Rheumatology,0.47540064148727224
-Gelderland,Internal Medicine,0.4534881668091363
-Gelderland,Rehabilitation Medicine,0.4534881668091363
-Gelderland,Audiology,0.4534881668091363
-Gelderland,Oncology & Radiotherapy,0.4534881668091363
-Gelderland,Gastroenterology & Hepatology,0.4315756921310002
-Gelderland,Pain Management & Anaesthesiology,0.4315756921310002
-Gelderland,Radiology & Interventional Radiology,0.4096632174528643
-Gelderland,General & Trauma Surgery,0.4096632174528643
-Gelderland,Dermatology & Allergology,0.3877507427747283
-Gelderland,Clinical Genetics,0.3658382680965923
-Gelderland,Plastic & Reconstructive Surgery,0.3658382680965923
-Gelderland,ENT,0.3658382680965923
-Gelderland,Psychiatry & Mental Health,0.3220133187403204
-Gelderland,Sports Medicine & Other,0.2781883693840484
-Gelderland,Gynecology & Obstetrics,0.19053847067150445
-Gelderland,Pediatrics,0.015238673246416591
-Groningen,Geriatrics & Elderly Care,0.6999033445432457
-Groningen,Cardiology,0.5068247020409025
-Groningen,Orthopedics,0.48751683779066807
-Groningen,Ophthalmology,0.4682089735404337
-Groningen,Neurology & Neurosurgery,0.4489011092901995
-Groningen,Pulmonology,0.42959324503996515
-Groningen,Urology,0.42959324503996515
-Groningen,Cardiothoracic Surgery,0.42959324503996515
-Groningen,Rheumatology,0.4102853807897308
-Groningen,Internal Medicine,0.3909775165394965
-Groningen,Rehabilitation Medicine,0.3909775165394965
-Groningen,Audiology,0.3909775165394965
-Groningen,Oncology & Radiotherapy,0.3909775165394965
-Groningen,Gastroenterology & Hepatology,0.37166965228926213
-Groningen,Pain Management & Anaesthesiology,0.37166965228926213
-Groningen,Radiology & Interventional Radiology,0.35236178803902785
-Groningen,General & Trauma Surgery,0.35236178803902785
-Groningen,Dermatology & Allergology,0.3330539237887935
-Groningen,Clinical Genetics,0.31374605953855916
-Groningen,Plastic & Reconstructive Surgery,0.31374605953855916
-Groningen,ENT,0.31374605953855916
-Groningen,Psychiatry & Mental Health,0.27513033103809054
-Groningen,Sports Medicine & Other,0.23651460253762188
-Groningen,Gynecology & Obstetrics,0.15928314553668455
-Groningen,Pediatrics,0.004820231534809958
-Limburg,Geriatrics & Elderly Care,0.8652769149229458
-Limburg,Cardiology,0.6308548798256775
-Limburg,Orthopedics,0.6074126763159506
-Limburg,Ophthalmology,0.5839704728062238
-Limburg,Neurology & Neurosurgery,0.560528269296497
-Limburg,Pulmonology,0.5370860657867702
-Limburg,Urology,0.5370860657867702
-Limburg,Cardiothoracic Surgery,0.5370860657867702
-Limburg,Rheumatology,0.5136438622770434
-Limburg,Internal Medicine,0.49020165876731653
-Limburg,Rehabilitation Medicine,0.49020165876731653
-Limburg,Audiology,0.49020165876731653
-Limburg,Oncology & Radiotherapy,0.49020165876731653
-Limburg,Gastroenterology & Hepatology,0.46675945525758966
-Limburg,Pain Management & Anaesthesiology,0.46675945525758966
-Limburg,Radiology & Interventional Radiology,0.4433172517478629
-Limburg,General & Trauma Surgery,0.4433172517478629
-Limburg,Dermatology & Allergology,0.41987504823813604
-Limburg,Clinical Genetics,0.39643284472840923
-Limburg,Plastic & Reconstructive Surgery,0.39643284472840923
-Limburg,ENT,0.39643284472840923
-Limburg,Psychiatry & Mental Health,0.3495484377089556
-Limburg,Sports Medicine & Other,0.30266403068950193
-Limburg,Gynecology & Obstetrics,0.20889521665059457
-Limburg,Pediatrics,0.021357588572779966
-Noord-Brabant,Geriatrics & Elderly Care,0.7530293755523392
-Noord-Brabant,Cardiology,0.5466692252977225
-Noord-Brabant,Orthopedics,0.5260332102722609
-Noord-Brabant,Ophthalmology,0.5053971952467993
-Noord-Brabant,Neurology & Neurosurgery,0.4847611802213376
-Noord-Brabant,Pulmonology,0.46412516519587593
-Noord-Brabant,Urology,0.46412516519587593
-Noord-Brabant,Cardiothoracic Surgery,0.46412516519587593
-Noord-Brabant,Rheumatology,0.44348915017041424
-Noord-Brabant,Internal Medicine,0.4228531351449526
-Noord-Brabant,Rehabilitation Medicine,0.4228531351449526
-Noord-Brabant,Audiology,0.4228531351449526
-Noord-Brabant,Oncology & Radiotherapy,0.4228531351449526
-Noord-Brabant,Gastroenterology & Hepatology,0.4022171201194909
-Noord-Brabant,Pain Management & Anaesthesiology,0.4022171201194909
-Noord-Brabant,Radiology & Interventional Radiology,0.38158110509402926
-Noord-Brabant,General & Trauma Surgery,0.38158110509402926
-Noord-Brabant,Dermatology & Allergology,0.36094509006856756
-Noord-Brabant,Clinical Genetics,0.3403090750431059
-Noord-Brabant,Plastic & Reconstructive Surgery,0.3403090750431059
-Noord-Brabant,ENT,0.3403090750431059
-Noord-Brabant,Psychiatry & Mental Health,0.2990370449921826
-Noord-Brabant,Sports Medicine & Other,0.25776501494125925
-Noord-Brabant,Gynecology & Obstetrics,0.1752209548394126
-Noord-Brabant,Pediatrics,0.010132834635719306
-Noord-Holland,Geriatrics & Elderly Care,0.7739962814732807
-Noord-Holland,Cardiology,0.5623944047384287
-Noord-Holland,Orthopedics,0.5412342170649435
-Noord-Holland,Ophthalmology,0.5200740293914583
-Noord-Holland,Neurology & Neurosurgery,0.4989138417179731
-Noord-Holland,Pulmonology,0.4777536540444879
-Noord-Holland,Urology,0.4777536540444879
-Noord-Holland,Cardiothoracic Surgery,0.4777536540444879
-Noord-Holland,Rheumatology,0.4565934663710027
-Noord-Holland,Internal Medicine,0.4354332786975175
-Noord-Holland,Rehabilitation Medicine,0.4354332786975175
-Noord-Holland,Audiology,0.4354332786975175
-Noord-Holland,Oncology & Radiotherapy,0.4354332786975175
-Noord-Holland,Gastroenterology & Hepatology,0.4142730910240323
-Noord-Holland,Pain Management & Anaesthesiology,0.4142730910240323
-Noord-Holland,Radiology & Interventional Radiology,0.3931129033505471
-Noord-Holland,General & Trauma Surgery,0.3931129033505471
-Noord-Holland,Dermatology & Allergology,0.3719527156770619
-Noord-Holland,Clinical Genetics,0.3507925280035767
-Noord-Holland,Plastic & Reconstructive Surgery,0.3507925280035767
-Noord-Holland,ENT,0.3507925280035767
-Noord-Holland,Psychiatry & Mental Health,0.30847215265660627
-Noord-Holland,Sports Medicine & Other,0.2661517773096359
-Noord-Holland,Gynecology & Obstetrics,0.18151102661569507
-Noord-Holland,Pediatrics,0.012229525227813459
-Overijssel,Geriatrics & Elderly Care,0.7226236363688247
-Overijssel,Cardiology,0.5238649209100866
-Overijssel,Orthopedics,0.5039890493642127
-Overijssel,Ophthalmology,0.48411317781833896
-Overijssel,Neurology & Neurosurgery,0.4642373062724653
-Overijssel,Pulmonology,0.44436143472659145
-Overijssel,Urology,0.44436143472659145
-Overijssel,Cardiothoracic Surgery,0.44436143472659145
-Overijssel,Rheumatology,0.4244855631807176
-Overijssel,Internal Medicine,0.4046096916348438
-Overijssel,Rehabilitation Medicine,0.4046096916348438
-Overijssel,Audiology,0.4046096916348438
-Overijssel,Oncology & Radiotherapy,0.4046096916348438
-Overijssel,Gastroenterology & Hepatology,0.38473382008896995
-Overijssel,Pain Management & Anaesthesiology,0.38473382008896995
-Overijssel,Radiology & Interventional Radiology,0.3648579485430963
-Overijssel,General & Trauma Surgery,0.3648579485430963
-Overijssel,Dermatology & Allergology,0.34498207699722244
-Overijssel,Clinical Genetics,0.3251062054513486
-Overijssel,Plastic & Reconstructive Surgery,0.3251062054513486
-Overijssel,ENT,0.3251062054513486
-Overijssel,Psychiatry & Mental Health,0.28535446235960105
-Overijssel,Sports Medicine & Other,0.24560271926785346
-Overijssel,Gynecology & Obstetrics,0.16609923308435823
-Overijssel,Pediatrics,0.007092260717367854
-Utrecht,Geriatrics & Elderly Care,0.6952258156135396
-Utrecht,Cardiology,0.5033165553436229
-Utrecht,Orthopedics,0.48412562931663117
-Utrecht,Ophthalmology,0.46493470328963954
-Utrecht,Neurology & Neurosurgery,0.44574377726264786
-Utrecht,Pulmonology,0.42655285123565617
-Utrecht,Urology,0.42655285123565617
-Utrecht,Cardiothoracic Surgery,0.42655285123565617
-Utrecht,Rheumatology,0.4073619252086645
-Utrecht,Internal Medicine,0.3881709991816728
-Utrecht,Rehabilitation Medicine,0.3881709991816728
-Utrecht,Audiology,0.3881709991816728
-Utrecht,Oncology & Radiotherapy,0.3881709991816728
-Utrecht,Gastroenterology & Hepatology,0.3689800731546811
-Utrecht,Pain Management & Anaesthesiology,0.3689800731546811
-Utrecht,Radiology & Interventional Radiology,0.3497891471276895
-Utrecht,General & Trauma Surgery,0.3497891471276895
-Utrecht,Dermatology & Allergology,0.3305982211006978
-Utrecht,Clinical Genetics,0.3114072950737061
-Utrecht,Plastic & Reconstructive Surgery,0.3114072950737061
-Utrecht,ENT,0.3114072950737061
-Utrecht,Psychiatry & Mental Health,0.27302544301972276
-Utrecht,Sports Medicine & Other,0.23464359096573942
-Utrecht,Gynecology & Obstetrics,0.15787988685777274
-Utrecht,Pediatrics,0.0043524786418393455
-Zeeland,Geriatrics & Elderly Care,0.6638977529979981
-Zeeland,Cardiology,0.4798205083819667
-Zeeland,Orthopedics,0.46141278392036356
-Zeeland,Ophthalmology,0.44300505945876045
-Zeeland,Neurology & Neurosurgery,0.42459733499715735
-Zeeland,Pulmonology,0.4061896105355542
-Zeeland,Urology,0.4061896105355542
-Zeeland,Cardiothoracic Surgery,0.4061896105355542
-Zeeland,Rheumatology,0.38778188607395103
-Zeeland,Internal Medicine,0.36937416161234793
-Zeeland,Rehabilitation Medicine,0.36937416161234793
-Zeeland,Audiology,0.36937416161234793
-Zeeland,Oncology & Radiotherapy,0.36937416161234793
-Zeeland,Gastroenterology & Hepatology,0.35096643715074477
-Zeeland,Pain Management & Anaesthesiology,0.35096643715074477
-Zeeland,Radiology & Interventional Radiology,0.33255871268914167
-Zeeland,General & Trauma Surgery,0.33255871268914167
-Zeeland,Dermatology & Allergology,0.3141509882275385
-Zeeland,Clinical Genetics,0.29574326376593535
-Zeeland,Plastic & Reconstructive Surgery,0.29574326376593535
-Zeeland,ENT,0.29574326376593535
-Zeeland,Psychiatry & Mental Health,0.2589278148427291
-Zeeland,Sports Medicine & Other,0.22211236591952285
-Zeeland,Gynecology & Obstetrics,0.14848146807311027
-Zeeland,Pediatrics,0.001219672380285199
-Zuid-Holland,Geriatrics & Elderly Care,0.6517010291951462
-Zuid-Holland,Cardiology,0.4706729655298278
-Zuid-Holland,Orthopedics,0.45257015916329596
-Zuid-Holland,Ophthalmology,0.4344673527967641
-Zuid-Holland,Neurology & Neurosurgery,0.41636454643023224
-Zuid-Holland,Pulmonology,0.3982617400637004
-Zuid-Holland,Urology,0.3982617400637004
-Zuid-Holland,Cardiothoracic Surgery,0.3982617400637004
-Zuid-Holland,Rheumatology,0.3801589336971686
-Zuid-Holland,Internal Medicine,0.36205612733063675
-Zuid-Holland,Rehabilitation Medicine,0.36205612733063675
-Zuid-Holland,Audiology,0.36205612733063675
-Zuid-Holland,Oncology & Radiotherapy,0.36205612733063675
-Zuid-Holland,Gastroenterology & Hepatology,0.3439533209641049
-Zuid-Holland,Pain Management & Anaesthesiology,0.3439533209641049
-Zuid-Holland,Radiology & Interventional Radiology,0.3258505145975731
-Zuid-Holland,General & Trauma Surgery,0.3258505145975731
-Zuid-Holland,Dermatology & Allergology,0.30774770823104125
-Zuid-Holland,Clinical Genetics,0.2896449018645094
-Zuid-Holland,Plastic & Reconstructive Surgery,0.2896449018645094
-Zuid-Holland,ENT,0.2896449018645094
-Zuid-Holland,Psychiatry & Mental Health,0.2534392891314457
-Zuid-Holland,Sports Medicine & Other,0.21723367639838204
-Zuid-Holland,Gynecology & Obstetrics,0.1448224509322547
-Zuid-Holland,Pediatrics,0
+Flevoland,Cardiology,0.75
+Flevoland,Orthopedics,0.7250000000000001
+Flevoland,Ophthalmology,0.7
+Flevoland,Neurology & Neurosurgery,0.6749999999999999
+Flevoland,Pulmonology,0.65
+Flevoland,Urology,0.65
+Flevoland,Cardiothoracic Surgery,0.65
+Flevoland,Rheumatology,0.625
+Flevoland,Internal Medicine,0.6
+Flevoland,Rehabilitation Medicine,0.6
+Flevoland,Audiology,0.6
+Flevoland,Oncology & Radiotherapy,0.6
+Flevoland,Gastroenterology & Hepatology,0.575
+Flevoland,Pain Management & Anaesthesiology,0.575
+Flevoland,Radiology & Interventional Radiology,0.55
+Flevoland,General & Trauma Surgery,0.55
+Flevoland,Dermatology & Allergology,0.525
+Flevoland,Clinical Genetics,0.5
+Flevoland,Plastic & Reconstructive Surgery,0.5
+Flevoland,ENT,0.5
+Flevoland,Psychiatry & Mental Health,0.45
+Flevoland,Sports Medicine & Other,0.4
+Flevoland,Gynecology & Obstetrics,0.3
+Flevoland,Pediatrics,0.1
+Fryslân,Geriatrics & Elderly Care,0.7922514093904418
+Fryslân,Cardiology,0.5941885570428314
+Fryslân,Orthopedics,0.5743822718080703
+Fryslân,Ophthalmology,0.5545759865733092
+Fryslân,Neurology & Neurosurgery,0.5347697013385483
+Fryslân,Pulmonology,0.5149634161037872
+Fryslân,Urology,0.5149634161037872
+Fryslân,Cardiothoracic Surgery,0.5149634161037872
+Fryslân,Rheumatology,0.49515713086902613
+Fryslân,Internal Medicine,0.47535084563426505
+Fryslân,Rehabilitation Medicine,0.47535084563426505
+Fryslân,Audiology,0.47535084563426505
+Fryslân,Oncology & Radiotherapy,0.47535084563426505
+Fryslân,Gastroenterology & Hepatology,0.45554456039950403
+Fryslân,Pain Management & Anaesthesiology,0.45554456039950403
+Fryslân,Radiology & Interventional Radiology,0.435738275164743
+Fryslân,General & Trauma Surgery,0.435738275164743
+Fryslân,Dermatology & Allergology,0.415931989929982
+Fryslân,Clinical Genetics,0.3961257046952209
+Fryslân,Plastic & Reconstructive Surgery,0.3961257046952209
+Fryslân,ENT,0.3961257046952209
+Fryslân,Psychiatry & Mental Health,0.35651313422569886
+Fryslân,Sports Medicine & Other,0.31690056375617676
+Fryslân,Gynecology & Obstetrics,0.23767542281713253
+Fryslân,Pediatrics,0.07922514093904419
+Gelderland,Geriatrics & Elderly Care,0.8173161249262996
+Gelderland,Cardiology,0.6129870936947247
+Gelderland,Orthopedics,0.5925541905715672
+Gelderland,Ophthalmology,0.5721212874484096
+Gelderland,Neurology & Neurosurgery,0.5516883843252522
+Gelderland,Pulmonology,0.5312554812020946
+Gelderland,Urology,0.5312554812020946
+Gelderland,Cardiothoracic Surgery,0.5312554812020946
+Gelderland,Rheumatology,0.5108225780789373
+Gelderland,Internal Medicine,0.49038967495577973
+Gelderland,Rehabilitation Medicine,0.49038967495577973
+Gelderland,Audiology,0.49038967495577973
+Gelderland,Oncology & Radiotherapy,0.49038967495577973
+Gelderland,Gastroenterology & Hepatology,0.4699567718326222
+Gelderland,Pain Management & Anaesthesiology,0.4699567718326222
+Gelderland,Radiology & Interventional Radiology,0.4495238687094648
+Gelderland,General & Trauma Surgery,0.4495238687094648
+Gelderland,Dermatology & Allergology,0.42909096558630727
+Gelderland,Clinical Genetics,0.4086580624631498
+Gelderland,Plastic & Reconstructive Surgery,0.4086580624631498
+Gelderland,ENT,0.4086580624631498
+Gelderland,Psychiatry & Mental Health,0.3677922562168348
+Gelderland,Sports Medicine & Other,0.32692644997051984
+Gelderland,Gynecology & Obstetrics,0.24519483747788987
+Gelderland,Pediatrics,0.08173161249262996
+Groningen,Geriatrics & Elderly Care,0.720166435849908
+Groningen,Cardiology,0.540124826887431
+Groningen,Orthopedics,0.5221206659911833
+Groningen,Ophthalmology,0.5041165050949356
+Groningen,Neurology & Neurosurgery,0.48611234419868793
+Groningen,Pulmonology,0.4681081833024402
+Groningen,Urology,0.4681081833024402
+Groningen,Cardiothoracic Surgery,0.4681081833024402
+Groningen,Rheumatology,0.4501040224061925
+Groningen,Internal Medicine,0.4320998615099448
+Groningen,Rehabilitation Medicine,0.4320998615099448
+Groningen,Audiology,0.4320998615099448
+Groningen,Oncology & Radiotherapy,0.4320998615099448
+Groningen,Gastroenterology & Hepatology,0.41409570061369705
+Groningen,Pain Management & Anaesthesiology,0.41409570061369705
+Groningen,Radiology & Interventional Radiology,0.3960915397174494
+Groningen,General & Trauma Surgery,0.3960915397174494
+Groningen,Dermatology & Allergology,0.3780873788212017
+Groningen,Clinical Genetics,0.360083217924954
+Groningen,Plastic & Reconstructive Surgery,0.360083217924954
+Groningen,ENT,0.360083217924954
+Groningen,Psychiatry & Mental Health,0.3240748961324586
+Groningen,Sports Medicine & Other,0.28806657433996324
+Groningen,Gynecology & Obstetrics,0.2160499307549724
+Groningen,Pediatrics,0.07201664358499081
+Limburg,Geriatrics & Elderly Care,0.8743736713325652
+Limburg,Cardiology,0.6557802534994239
+Limburg,Orthopedics,0.6339209117161098
+Limburg,Ophthalmology,0.6120615699327956
+Limburg,Neurology & Neurosurgery,0.5902022281494815
+Limburg,Pulmonology,0.5683428863661674
+Limburg,Urology,0.5683428863661674
+Limburg,Cardiothoracic Surgery,0.5683428863661674
+Limburg,Rheumatology,0.5464835445828533
+Limburg,Internal Medicine,0.5246242027995391
+Limburg,Rehabilitation Medicine,0.5246242027995391
+Limburg,Audiology,0.5246242027995391
+Limburg,Oncology & Radiotherapy,0.5246242027995391
+Limburg,Gastroenterology & Hepatology,0.502764861016225
+Limburg,Pain Management & Anaesthesiology,0.502764861016225
+Limburg,Radiology & Interventional Radiology,0.4809055192329109
+Limburg,General & Trauma Surgery,0.4809055192329109
+Limburg,Dermatology & Allergology,0.45904617744959675
+Limburg,Clinical Genetics,0.4371868356662826
+Limburg,Plastic & Reconstructive Surgery,0.4371868356662826
+Limburg,ENT,0.4371868356662826
+Limburg,Psychiatry & Mental Health,0.3934681520996544
+Limburg,Sports Medicine & Other,0.3497494685330261
+Limburg,Gynecology & Obstetrics,0.26231210139976957
+Limburg,Pediatrics,0.08743736713325652
+Noord-Brabant,Geriatrics & Elderly Care,0.7697052972004148
+Noord-Brabant,Cardiology,0.577278972900311
+Noord-Brabant,Orthopedics,0.5580363404703007
+Noord-Brabant,Ophthalmology,0.5387937080402904
+Noord-Brabant,Neurology & Neurosurgery,0.5195510756102799
+Noord-Brabant,Pulmonology,0.5003084431802696
+Noord-Brabant,Urology,0.5003084431802696
+Noord-Brabant,Cardiothoracic Surgery,0.5003084431802696
+Noord-Brabant,Rheumatology,0.4810658107502592
+Noord-Brabant,Internal Medicine,0.46182317832024883
+Noord-Brabant,Rehabilitation Medicine,0.46182317832024883
+Noord-Brabant,Audiology,0.46182317832024883
+Noord-Brabant,Oncology & Radiotherapy,0.46182317832024883
+Noord-Brabant,Gastroenterology & Hepatology,0.4425805458902385
+Noord-Brabant,Pain Management & Anaesthesiology,0.4425805458902385
+Noord-Brabant,Radiology & Interventional Radiology,0.42333791346022814
+Noord-Brabant,General & Trauma Surgery,0.42333791346022814
+Noord-Brabant,Dermatology & Allergology,0.40409528103021775
+Noord-Brabant,Clinical Genetics,0.3848526486002074
+Noord-Brabant,Plastic & Reconstructive Surgery,0.3848526486002074
+Noord-Brabant,ENT,0.3848526486002074
+Noord-Brabant,Psychiatry & Mental Health,0.34636738374018666
+Noord-Brabant,Sports Medicine & Other,0.3078821188801659
+Noord-Brabant,Gynecology & Obstetrics,0.23091158916012441
+Noord-Brabant,Pediatrics,0.07697052972004148
+Noord-Holland,Geriatrics & Elderly Care,0.7892564781495215
+Noord-Holland,Cardiology,0.5919423586121411
+Noord-Holland,Orthopedics,0.5722109466584031
+Noord-Holland,Ophthalmology,0.552479534704665
+Noord-Holland,Neurology & Neurosurgery,0.532748122750927
+Noord-Holland,Pulmonology,0.5130167107971889
+Noord-Holland,Urology,0.5130167107971889
+Noord-Holland,Cardiothoracic Surgery,0.5130167107971889
+Noord-Holland,Rheumatology,0.4932852988434509
+Noord-Holland,Internal Medicine,0.4735538868897129
+Noord-Holland,Rehabilitation Medicine,0.4735538868897129
+Noord-Holland,Audiology,0.4735538868897129
+Noord-Holland,Oncology & Radiotherapy,0.4735538868897129
+Noord-Holland,Gastroenterology & Hepatology,0.45382247493597483
+Noord-Holland,Pain Management & Anaesthesiology,0.45382247493597483
+Noord-Holland,Radiology & Interventional Radiology,0.4340910629822368
+Noord-Holland,General & Trauma Surgery,0.4340910629822368
+Noord-Holland,Dermatology & Allergology,0.41435965102849875
+Noord-Holland,Clinical Genetics,0.39462823907476074
+Noord-Holland,Plastic & Reconstructive Surgery,0.39462823907476074
+Noord-Holland,ENT,0.39462823907476074
+Noord-Holland,Psychiatry & Mental Health,0.35516541516728467
+Noord-Holland,Sports Medicine & Other,0.3157025912598086
+Noord-Holland,Gynecology & Obstetrics,0.23677694344485645
+Noord-Holland,Pediatrics,0.07892564781495215
+Overijssel,Geriatrics & Elderly Care,0.7413526107854636
+Overijssel,Cardiology,0.5560144580890977
+Overijssel,Orthopedics,0.5374806428194611
+Overijssel,Ophthalmology,0.5189468275498245
+Overijssel,Neurology & Neurosurgery,0.500413012280188
+Overijssel,Pulmonology,0.4818791970105514
+Overijssel,Urology,0.4818791970105514
+Overijssel,Cardiothoracic Surgery,0.4818791970105514
+Overijssel,Rheumatology,0.4633453817409148
+Overijssel,Internal Medicine,0.4448115664712781
+Overijssel,Rehabilitation Medicine,0.4448115664712781
+Overijssel,Audiology,0.4448115664712781
+Overijssel,Oncology & Radiotherapy,0.4448115664712781
+Overijssel,Gastroenterology & Hepatology,0.4262777512016415
+Overijssel,Pain Management & Anaesthesiology,0.4262777512016415
+Overijssel,Radiology & Interventional Radiology,0.40774393593200503
+Overijssel,General & Trauma Surgery,0.40774393593200503
+Overijssel,Dermatology & Allergology,0.38921012066236843
+Overijssel,Clinical Genetics,0.3706763053927318
+Overijssel,Plastic & Reconstructive Surgery,0.3706763053927318
+Overijssel,ENT,0.3706763053927318
+Overijssel,Psychiatry & Mental Health,0.33360867485345863
+Overijssel,Sports Medicine & Other,0.2965410443141855
+Overijssel,Gynecology & Obstetrics,0.22240578323563906
+Overijssel,Pediatrics,0.07413526107854637
+Utrecht,Geriatrics & Elderly Care,0.7158047424820743
+Utrecht,Cardiology,0.5368535568615557
+Utrecht,Orthopedics,0.5189584382995038
+Utrecht,Ophthalmology,0.501063319737452
+Utrecht,Neurology & Neurosurgery,0.4831682011754001
+Utrecht,Pulmonology,0.46527308261334827
+Utrecht,Urology,0.46527308261334827
+Utrecht,Cardiothoracic Surgery,0.46527308261334827
+Utrecht,Rheumatology,0.44737796405129643
+Utrecht,Internal Medicine,0.42948284548924454
+Utrecht,Rehabilitation Medicine,0.42948284548924454
+Utrecht,Audiology,0.42948284548924454
+Utrecht,Oncology & Radiotherapy,0.42948284548924454
+Utrecht,Gastroenterology & Hepatology,0.4115877269271927
+Utrecht,Pain Management & Anaesthesiology,0.4115877269271927
+Utrecht,Radiology & Interventional Radiology,0.39369260836514086
+Utrecht,General & Trauma Surgery,0.39369260836514086
+Utrecht,Dermatology & Allergology,0.37579748980308897
+Utrecht,Clinical Genetics,0.35790237124103713
+Utrecht,Plastic & Reconstructive Surgery,0.35790237124103713
+Utrecht,ENT,0.35790237124103713
+Utrecht,Psychiatry & Mental Health,0.3221121341169334
+Utrecht,Sports Medicine & Other,0.28632189699282967
+Utrecht,Gynecology & Obstetrics,0.21474142274462227
+Utrecht,Pediatrics,0.07158047424820742
+Zeeland,Geriatrics & Elderly Care,0.6865920096501098
+Zeeland,Cardiology,0.5149440072375824
+Zeeland,Orthopedics,0.49777920699632966
+Zeeland,Ophthalmology,0.4806144067550769
+Zeeland,Neurology & Neurosurgery,0.46344960651382416
+Zeeland,Pulmonology,0.44628480627257144
+Zeeland,Urology,0.44628480627257144
+Zeeland,Cardiothoracic Surgery,0.44628480627257144
+Zeeland,Rheumatology,0.42912000603131867
+Zeeland,Internal Medicine,0.4119552057900659
+Zeeland,Rehabilitation Medicine,0.4119552057900659
+Zeeland,Audiology,0.4119552057900659
+Zeeland,Oncology & Radiotherapy,0.4119552057900659
+Zeeland,Gastroenterology & Hepatology,0.3947904055488131
+Zeeland,Pain Management & Anaesthesiology,0.3947904055488131
+Zeeland,Radiology & Interventional Radiology,0.37762560530756045
+Zeeland,General & Trauma Surgery,0.37762560530756045
+Zeeland,Dermatology & Allergology,0.3604608050663077
+Zeeland,Clinical Genetics,0.3432960048250549
+Zeeland,Plastic & Reconstructive Surgery,0.3432960048250549
+Zeeland,ENT,0.3432960048250549
+Zeeland,Psychiatry & Mental Health,0.30896640434254946
+Zeeland,Sports Medicine & Other,0.27463680386004397
+Zeeland,Gynecology & Obstetrics,0.20597760289503295
+Zeeland,Pediatrics,0.06865920096501099
+Zuid-Holland,Geriatrics & Elderly Care,0.6752188316068172
+Zuid-Holland,Cardiology,0.5064141237051129
+Zuid-Holland,Orthopedics,0.48953365291494244
+Zuid-Holland,Ophthalmology,0.47265318212477203
+Zuid-Holland,Neurology & Neurosurgery,0.4557727113346016
+Zuid-Holland,Pulmonology,0.43889224054443116
+Zuid-Holland,Urology,0.43889224054443116
+Zuid-Holland,Cardiothoracic Surgery,0.43889224054443116
+Zuid-Holland,Rheumatology,0.42201176975426075
+Zuid-Holland,Internal Medicine,0.40513129896409034
+Zuid-Holland,Rehabilitation Medicine,0.40513129896409034
+Zuid-Holland,Audiology,0.40513129896409034
+Zuid-Holland,Oncology & Radiotherapy,0.40513129896409034
+Zuid-Holland,Gastroenterology & Hepatology,0.38825082817391987
+Zuid-Holland,Pain Management & Anaesthesiology,0.38825082817391987
+Zuid-Holland,Radiology & Interventional Radiology,0.37137035738374946
+Zuid-Holland,General & Trauma Surgery,0.37137035738374946
+Zuid-Holland,Dermatology & Allergology,0.354489886593579
+Zuid-Holland,Clinical Genetics,0.3376094158034086
+Zuid-Holland,Plastic & Reconstructive Surgery,0.3376094158034086
+Zuid-Holland,ENT,0.3376094158034086
+Zuid-Holland,Psychiatry & Mental Health,0.3038484742230677
+Zuid-Holland,Sports Medicine & Other,0.2700875326427269
+Zuid-Holland,Gynecology & Obstetrics,0.20256564948204517
+Zuid-Holland,Pediatrics,0.06752188316068172
