@@ -140,6 +140,8 @@ Rscript R/06_indicators.R
 
 A four-level drill-down diagnostic tool: **Map → Pillar → Indicator → Root Cause**.
 
+**Live app:** https://mousticoder.shinyapps.io/cgi-diagnostic/
+
 ### Data sources
 
 The app reads exactly two files at startup:
