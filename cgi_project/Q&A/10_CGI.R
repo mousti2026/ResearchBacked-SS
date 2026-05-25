@@ -13,7 +13,8 @@ library(tidyverse)
     else "C:/Users/Samsung/OneDrive/Desktop/ProjectMay/ResearchBacked_SS_proj/cgi_project/Q&A"
   }
 )
-OUT_DIR <- file.path(.here, "output")
+OUT_DIR   <- file.path(.here, "output")
+PROCESSED <- normalizePath(file.path(.here, "..", "data", "processed"), winslash = "/")
 dir.create(OUT_DIR, showWarnings = FALSE, recursive = TRUE)
 
 # ── Specialisms without NZa waiting time data → AS pillar = NA ────────────────
@@ -71,12 +72,45 @@ cgi_final <- cgi_wide %>%
          AS1_norm, AS2_norm, AS3_norm,
          DP, SP, AS, CGI, incomplete_AS)
 
-# ── Save ───────────────────────────────────────────────────────────────────────
+# ── Save cell-level output ─────────────────────────────────────────────────────
 write_csv(cgi_final, file.path(OUT_DIR, "CGI_final.csv"))
 
+# ── Province rollup: DBC-volume-weighted (mirrors 08_aggregate.R) ─────────────
+# CGI_{p} = Σ_s [ (DBC_{p,s,2025} / Σ_s DBC_{p,s,2025}) × CGI_{p,s} ]
+pop_summary <- readRDS(file.path(PROCESSED, "pop_summary.rds"))
+dbc_shares  <- readRDS(file.path(PROCESSED, "dbc_shares.rds"))
+
+expected_dbc_2025 <- pop_summary %>%
+  filter(year == 2025) %>%
+  select(province, contact_potential) %>%
+  cross_join(dbc_shares %>% select(specialism = category, mu_s)) %>%
+  mutate(expected_dbc = contact_potential * mu_s) %>%
+  select(province, specialism, expected_dbc)
+
+dbc_weights <- expected_dbc_2025 %>%
+  group_by(province) %>%
+  mutate(w_s = expected_dbc / sum(expected_dbc, na.rm = TRUE)) %>%
+  ungroup() %>%
+  select(province, specialism, w_s)
+
+province_rollup <- cgi_final %>%
+  left_join(dbc_weights, by = c("province", "specialism")) %>%
+  group_by(province) %>%
+  summarise(
+    CGI = sum(w_s * CGI, na.rm = TRUE),
+    DP  = sum(w_s * DP,  na.rm = TRUE),
+    SP  = sum(w_s * SP,  na.rm = TRUE),
+    AS  = if_else(all(is.na(AS)), NA_real_,
+                  sum(w_s * AS, na.rm = TRUE) / sum(w_s[!is.na(AS)], na.rm = TRUE)),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(CGI))
+
+write_csv(province_rollup, file.path(OUT_DIR, "CGI_province_rollup.csv"))
+
 # ── Summary output ─────────────────────────────────────────────────────────────
-n_complete   <- sum(!cgi_final$incomplete_AS, na.rm = TRUE)   # three-pillar rows
-n_incomplete <- sum( cgi_final$incomplete_AS, na.rm = TRUE)   # two-pillar rows
+n_complete   <- sum(!cgi_final$incomplete_AS, na.rm = TRUE)
+n_incomplete <- sum( cgi_final$incomplete_AS, na.rm = TRUE)
 
 cat("\n=== CGI Aggregation Summary ===\n")
 cat("Complete rows   (DP + SP + AS) / 3 :", n_complete,   "\n")
@@ -94,4 +128,9 @@ cgi_final %>%
   mutate(across(where(is.numeric), \(x) round(x, 3))) %>%
   print(n = 10)
 
-message("\n10_CGI.R complete — CGI_final.csv saved (", nrow(cgi_final), " rows)")
+cat("\nProvince rollup (DBC-volume-weighted):\n")
+province_rollup %>%
+  mutate(across(where(is.numeric), \(x) round(x, 3))) %>%
+  print(n = nrow(province_rollup))
+
+message("\n10_CGI.R complete — CGI_final.csv + CGI_province_rollup.csv saved")

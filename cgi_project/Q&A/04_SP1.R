@@ -57,15 +57,32 @@ wf_2025 <- workforce %>%
   filter(year == 2025, sector %in% c("zkh", "umc", "ggz")) %>%
   select(province, sector, werkende, tekort)
 
-# ── Step 2: Apply M weights → tekort_relevant and werkende_relevant ────────────
-# tekort_relevant_{p,s} = Σ_k M_{s,k} × tekort_{p,k,2025}
-sp1_agg <- m_matrix %>%
-  left_join(wf_2025, by = "sector",
-            relationship = "many-to-many") %>%    # attach province-level workforce
+# ── Step 1b: Province-calibrated M matrix (mirrors 04_supply.R) ───────────────
+# Province sector FTE shares at 2025 base year (werkende proportion within province)
+prov_sector_shares <- wf_2025 %>%
+  group_by(province) %>%
+  mutate(actual_share = werkende / sum(werkende, na.rm = TRUE)) %>%
+  ungroup() %>%
+  select(province, sector, actual_share)
+
+# Blend national M × province sector share, renormalise per (province, specialism)
+m_prov <- m_matrix %>%
+  left_join(prov_sector_shares, by = "sector",
+            relationship = "many-to-many") %>%
+  mutate(blend = share * coalesce(actual_share, 0)) %>%
+  group_by(province, specialism) %>%
+  mutate(share_prov = if_else(sum(blend) > 0, blend / sum(blend), 0)) %>%
+  ungroup() %>%
+  select(province, specialism, sector, share_prov)
+
+# ── Step 2: Apply province-calibrated M weights → tekort_relevant and werkende_relevant
+# tekort_relevant_{p,s} = Σ_k M_prov[p,s,k] × tekort_{p,k,2025}
+sp1_agg <- m_prov %>%
+  left_join(wf_2025, by = c("province", "sector")) %>%
   group_by(province, specialism) %>%
   summarise(
-    tekort_relevant   = sum(share * tekort,   na.rm = TRUE),  # weighted shortage
-    werkende_relevant = sum(share * werkende, na.rm = TRUE),  # weighted FTE
+    tekort_relevant   = sum(share_prov * tekort,   na.rm = TRUE),
+    werkende_relevant = sum(share_prov * werkende, na.rm = TRUE),
     .groups = "drop"
   )
 

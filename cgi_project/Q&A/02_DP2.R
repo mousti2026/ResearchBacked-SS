@@ -70,19 +70,22 @@ dp2_raw <- delta_share %>%
   mutate(DP2_raw = delta_65 * epsilon) %>%   # ageing momentum weighted by specialism
   select(province, specialism, DP2_raw)
 
-# ── Step 4: Min-max normalisation anchored to 2025 cross-sectional distribution
-min_2025 <- min(dp2_raw$DP2_raw, na.rm = TRUE)   # 2025 reference floor
-max_2025 <- max(dp2_raw$DP2_raw, na.rm = TRUE)   # 2025 reference ceiling
+# ── Step 4: Min-max normalisation — pipeline reference (07_normalize.R) ───────
+# DP2 is zero for ALL cells at 2025 by construction (Δshare_65plus from 2025→2025 = 0).
+# min_ref = 0  (no change at base year, by definition)
+# max_ref = max value across provinces × specialisms at 2035  (worst deterioration)
+min_ref <- 0
+max_ref <- max(dp2_raw$DP2_raw, na.rm = TRUE)
 
 dp2_norm <- dp2_raw %>%
-  mutate(DP2_norm = if (max_2025 == min_2025) 0.5
-                    else (DP2_raw - min_2025) / (max_2025 - min_2025)) %>%
+  mutate(DP2_norm = if (max_ref == min_ref) 0.5
+                    else (DP2_raw - min_ref) / (max_ref - min_ref)) %>%
   select(province, specialism, DP2_norm)
 
 # ── Step 5: Save and verify ────────────────────────────────────────────────────
 write_csv(dp2_norm, file.path(OUT_DIR, "DP2_norm.csv"))
 
-cat("min_2025 =", round(min_2025, 6), "| max_2025 =", round(max_2025, 6), "\n")
+cat("min_ref =", round(min_ref, 6), "| max_ref =", round(max_ref, 6), "\n")
 cat("DP2_norm range:", paste(round(range(dp2_norm$DP2_norm, na.rm = TRUE), 4), collapse = " – "), "\n")
 print(head(dp2_norm, 5))
 message("02_DP2.R complete — ", nrow(dp2_norm), " rows → DP2_norm.csv")

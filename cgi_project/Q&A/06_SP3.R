@@ -61,45 +61,62 @@ expected_dbc_2025 <- pop_summary %>%
   mutate(expected_dbc = contact_potential * mu_s) %>%    # Eq. 1
   select(province, specialism, expected_dbc)
 
-# ── Step 2: M-weighted FTE and shortage at 2025 (all provinces) ───────────────
+# ── Step 2: Province-calibrated M matrix (mirrors 04_supply.R) ────────────────
 wf_2025 <- workforce %>%
   filter(year == 2025, sector %in% c("zkh", "umc", "ggz")) %>%
   select(province, sector, werkende, tekort)
 
-supply_agg <- m_matrix %>%
-  left_join(wf_2025, by = "sector",
-            relationship = "many-to-many") %>%    # one sector × many specialisms
+# Province sector FTE shares at 2025 base year (werkende proportion within province)
+prov_sector_shares <- wf_2025 %>%
+  group_by(province) %>%
+  mutate(actual_share = werkende / sum(werkende, na.rm = TRUE)) %>%
+  ungroup() %>%
+  select(province, sector, actual_share)
+
+# Blend national M × province sector share, renormalise per (province, specialism)
+m_prov <- m_matrix %>%
+  left_join(prov_sector_shares, by = "sector",
+            relationship = "many-to-many") %>%
+  mutate(blend = share * coalesce(actual_share, 0)) %>%
+  group_by(province, specialism) %>%
+  mutate(share_prov = if_else(sum(blend) > 0, blend / sum(blend), 0)) %>%
+  ungroup() %>%
+  select(province, specialism, sector, share_prov)
+
+# Apply province-calibrated M → FTE_relevant and tekort_relevant
+supply_agg <- m_prov %>%
+  left_join(wf_2025, by = c("province", "sector")) %>%
   group_by(province, specialism) %>%
   summarise(
-    fte_relevant    = sum(share * werkende, na.rm = TRUE),  # FTE_relevant_{p,s}
-    tekort_relevant = sum(share * tekort,   na.rm = TRUE),  # shortage_{p,s}
+    fte_relevant    = sum(share_prov * werkende, na.rm = TRUE),
+    tekort_relevant = sum(share_prov * tekort,   na.rm = TRUE),
     .groups = "drop"
   )
 
-# ── Step 3: φ_s = national ExpectedDBC_s / national FTE_s  (Eq. 2 — national) ─
-# Using a national-level φ keeps SP3 distinct from SP1.
-# SP1 = tekort/werkende  (shortage as % of workforce — dimensionless ratio)
-# SP3 = φ_s × tekort / ExpectedDBC  (unmet DBCs as % of required volume)
-# With province-level φ, SP3 collapses to SP1; national φ breaks the identity.
-phi_national <- expected_dbc_2025 %>%
+# ── Step 3: φ_{p,s} = ExpectedDBC_{p,s,2025} / FTE_relevant_{p,s,2025} ────────
+# Province-level φ mirrors 04_supply.R; national median per specialism used as
+# fallback for zero-FTE cells (not national sum, which would conflate SP3 with SP1).
+phi_prov <- expected_dbc_2025 %>%
   left_join(supply_agg, by = c("province", "specialism")) %>%
-  group_by(specialism) %>%
-  summarise(
-    nat_dbc = sum(expected_dbc,   na.rm = TRUE),   # national expected volume
-    nat_fte = sum(fte_relevant,   na.rm = TRUE),   # national relevant FTE
-    .groups = "drop"
-  ) %>%
-  mutate(phi = if_else(nat_fte == 0, NA_real_,     # guard zero-FTE specialisms
-                       nat_dbc / nat_fte))          # DBCs per FTE — national rate
+  mutate(phi = if_else(fte_relevant > 0, expected_dbc / fte_relevant, NA_real_))
 
-write_csv(phi_national %>% select(specialism, phi),  # save φ_s lookup for reference
+phi_national_median <- phi_prov %>%
+  group_by(specialism) %>%
+  summarise(phi_median = median(phi, na.rm = TRUE), .groups = "drop")
+
+phi_prov <- phi_prov %>%
+  left_join(phi_national_median, by = "specialism") %>%
+  mutate(phi = if_else(is.na(phi) | !is.finite(phi), phi_median, phi)) %>%
+  select(province, specialism, phi)
+
+write_csv(phi_national_median %>% rename(phi = phi_median),
           file.path(OUT_DIR, "phi_lookup.csv"))
 
-# ── Step 4: SP3_raw = φ_s × tekort_relevant / ExpectedDBC ─────────────────────
+# ── Step 4: SP3_raw = φ_{p,s} × tekort_relevant / ExpectedDBC ─────────────────
 # Interpretation: fraction of expected care volume that cannot be delivered
 sp3_raw <- expected_dbc_2025 %>%
-  left_join(supply_agg,   by = c("province", "specialism")) %>%
-  left_join(phi_national  %>% select(specialism, phi), by = "specialism") %>%
+  left_join(supply_agg, by = c("province", "specialism")) %>%
+  left_join(phi_prov,   by = c("province", "specialism")) %>%
   mutate(SP3_raw = if_else(is.na(phi) | expected_dbc == 0, NA_real_,
                             phi * tekort_relevant / expected_dbc)) %>%
   select(province, specialism, SP3_raw)

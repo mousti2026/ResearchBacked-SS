@@ -58,18 +58,35 @@ wf_2025 <- workforce %>%
   filter(year == 2025, sector %in% c("zkh", "umc", "ggz")) %>%
   select(province, sector, werkende, share_55plus)
 
-# ── Step 2: M-weighted retirement share per province × specialism ──────────────
-# SP2_raw = Σ_k M_{s,k} × share_55plus_{p,k,2025}
-# Weight by FTE (werkende) within each sector so larger sectors count more
-sp2_agg <- m_matrix %>%
-  left_join(wf_2025, by = "sector",
-            relationship = "many-to-many") %>%             # attach sector data per province
-  mutate(effective_weight = share * werkende) %>%          # M-share × sector FTE
+# ── Step 1b: Province-calibrated M matrix (mirrors 04_supply.R) ───────────────
+# Province sector FTE shares at 2025 base year (werkende proportion within province)
+prov_sector_shares <- wf_2025 %>%
+  group_by(province) %>%
+  mutate(actual_share = werkende / sum(werkende, na.rm = TRUE)) %>%
+  ungroup() %>%
+  select(province, sector, actual_share)
+
+# Blend national M × province sector share, renormalise per (province, specialism)
+m_prov <- m_matrix %>%
+  left_join(prov_sector_shares, by = "sector",
+            relationship = "many-to-many") %>%
+  mutate(blend = share * coalesce(actual_share, 0)) %>%
+  group_by(province, specialism) %>%
+  mutate(share_prov = if_else(sum(blend) > 0, blend / sum(blend), 0)) %>%
+  ungroup() %>%
+  select(province, specialism, sector, share_prov)
+
+# ── Step 2: Province-calibrated M-weighted retirement share ───────────────────
+# SP2_raw = Σ_k M_prov[p,s,k] × werkende_{p,k} × share_55plus_{p,k}
+#         / Σ_k M_prov[p,s,k] × werkende_{p,k}
+sp2_agg <- m_prov %>%
+  left_join(wf_2025, by = c("province", "sector")) %>%
+  mutate(effective_weight = share_prov * werkende) %>%     # province-calibrated weight × FTE
   group_by(province, specialism) %>%
   summarise(
-    SP2_raw = if (sum(effective_weight, na.rm = TRUE) == 0) NA_real_
-              else sum(effective_weight * share_55plus, na.rm = TRUE) /  # weighted avg
-                   sum(effective_weight, na.rm = TRUE),
+    SP2_raw = if_else(sum(effective_weight, na.rm = TRUE) == 0, NA_real_,
+                      sum(effective_weight * share_55plus, na.rm = TRUE) /
+                        sum(effective_weight, na.rm = TRUE)),
     .groups = "drop"
   )
 

@@ -41,19 +41,22 @@ dp3_raw <- growth_prov %>%
   cross_join(dbc_shares %>% select(specialism = category)) %>%  # replicate per specialism
   select(province, specialism, DP3_raw)
 
-# ── Step 4: Min-max normalisation anchored to 2025 cross-sectional distribution
-min_2025 <- min(dp3_raw$DP3_raw, na.rm = TRUE)   # 2025 reference floor
-max_2025 <- max(dp3_raw$DP3_raw, na.rm = TRUE)   # 2025 reference ceiling
+# ── Step 4: Min-max normalisation — pipeline reference (07_normalize.R) ───────
+# DP3 is zero for ALL cells at 2025 by construction ((DBC_2025 - DBC_2025) / DBC_2025 = 0).
+# min_ref = 0  (no change at base year, by definition)
+# max_ref = max value across provinces × specialisms at 2035  (worst deterioration)
+min_ref <- 0
+max_ref <- max(dp3_raw$DP3_raw, na.rm = TRUE)
 
 dp3_norm <- dp3_raw %>%
-  mutate(DP3_norm = if (max_2025 == min_2025) 0.5
-                    else (DP3_raw - min_2025) / (max_2025 - min_2025)) %>%
+  mutate(DP3_norm = if (max_ref == min_ref) 0.5
+                    else (DP3_raw - min_ref) / (max_ref - min_ref)) %>%
   select(province, specialism, DP3_norm)
 
 # ── Step 5: Save and verify ────────────────────────────────────────────────────
 write_csv(dp3_norm, file.path(OUT_DIR, "DP3_norm.csv"))
 
-cat("min_2025 =", round(min_2025, 6), "| max_2025 =", round(max_2025, 6), "\n")
+cat("min_ref =", round(min_ref, 6), "| max_ref =", round(max_ref, 6), "\n")
 cat("DP3_norm range:", paste(round(range(dp3_norm$DP3_norm, na.rm = TRUE), 4), collapse = " – "), "\n")
 print(head(dp3_norm, 5))
 message("03_DP3.R complete — ", nrow(dp3_norm), " rows → DP3_norm.csv")
