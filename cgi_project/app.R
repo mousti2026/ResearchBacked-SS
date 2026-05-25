@@ -199,6 +199,22 @@ server <- function(input, output, session) {
     d
   })
 
+  # Pillar scores that respect the category filter:
+  # — "All": use DBC-weighted rollup (matches choropleth)
+  # — specific category: use that category's own DP/SP/AS/CGI
+  pillar_scores <- reactive({
+    if (!is.null(input$sel_category) && input$sel_category != "All") {
+      d <- filtered_data()
+      list(CGI = mean(d$CGI, na.rm=TRUE),
+           DP  = mean(d$DP,  na.rm=TRUE),
+           SP  = mean(d$SP,  na.rm=TRUE),
+           AS  = mean(d$AS,  na.rm=TRUE))
+    } else {
+      r <- prov_summary() %>% filter(province == rv$province)
+      list(CGI = r$CGI, DP = r$DP, SP = r$SP, AS = r$AS)
+    }
+  })
+
   # ── Breadcrumb ──────────────────────────────────────────────────────────────
   output$breadcrumb <- renderUI({
     crumbs <- list(
@@ -419,7 +435,7 @@ server <- function(input, output, session) {
         column(12,
           card(
             card_header("CGI by specialism — all pillars"),
-            plotlyOutput("specialism_heatmap", height = "280px")
+            plotlyOutput("specialism_heatmap", height = "620px")
           )
         )
       )
@@ -431,14 +447,11 @@ server <- function(input, output, session) {
   })
 
   output$province_score_summary <- renderUI({
-    # Use rollup value for the province CGI (DBC-weighted, matching the figure)
-    rollup_row <- prov_summary() %>% filter(province == rv$province)
-    d          <- filtered_data()
-
-    cgi_val <- rollup_row$CGI
-    dp_val  <- rollup_row$DP
-    sp_val  <- rollup_row$SP
-    as_val  <- rollup_row$AS
+    ps      <- pillar_scores()
+    cgi_val <- ps$CGI
+    dp_val  <- ps$DP
+    sp_val  <- ps$SP
+    as_val  <- ps$AS
 
     tagList(
       div(style = "text-align:center; margin:10px 0;",
@@ -476,13 +489,13 @@ server <- function(input, output, session) {
   })
 
   output$pillar_plot <- renderPlotly({
-    rollup_row <- prov_summary() %>% filter(province == rv$province)
-    nat        <- nat_avg()
+    ps  <- pillar_scores()
+    nat <- nat_avg()
 
     vals <- tibble(
       pillar = c("Demand\nPressure", "Supply\nPressure", "Access\nStress"),
       code   = c("DP", "SP", "AS"),
-      value  = c(rollup_row$DP, rollup_row$SP, rollup_row$AS),
+      value  = c(ps$DP, ps$SP, ps$AS),
       nat    = c(nat$DP, nat$SP, nat$AS)
     )
 
@@ -529,14 +542,14 @@ server <- function(input, output, session) {
   })
 
   output$pillar_cards <- renderUI({
-    rollup_row <- prov_summary() %>% filter(province == rv$province)
+    ps <- pillar_scores()
     pillars <- list(
       list(code = "DP", label = "Demand Pressure",
-           desc = "Population need, ageing & growth",  val = rollup_row$DP),
+           desc = "Population need, ageing & growth",  val = ps$DP),
       list(code = "SP", label = "Supply Pressure",
-           desc = "Shortages, retirement & FTE gaps",  val = rollup_row$SP),
+           desc = "Shortages, retirement & FTE gaps",  val = ps$SP),
       list(code = "AS", label = "Access Stress",
-           desc = "Wait times, breaches & density",    val = rollup_row$AS)
+           desc = "Wait times, breaches & density",    val = ps$AS)
     )
     fluidRow(lapply(pillars, function(pl) {
       col_hex <- c(DP = "#e66101", SP = "#5e3c99", AS = "#1a9641")[[pl$code]]
@@ -565,28 +578,41 @@ server <- function(input, output, session) {
   })
 
   output$specialism_heatmap <- renderPlotly({
-    d <- detail_yr() %>%
+    # Specialism × pillar matrix — rows ordered by CGI descending
+    d_wide <- detail_yr() %>%
       filter(province == rv$province) %>%
-      select(category, CGI)
+      select(category, DP, SP, AS, CGI)
 
-    p <- ggplot(d, aes(x = reorder(category, CGI), y = 1,
-                       fill = pmin(CGI, 1.5),
-                       text = paste0(category, "\nCGI: ", round(CGI, 3),
-                                     "\n", score_label(pmin(CGI, 1))))) +
-      geom_tile(colour = "white", linewidth = 0.3) +
+    cat_order <- d_wide %>% arrange(desc(CGI)) %>% pull(category)
+
+    d_long <- d_wide %>%
+      pivot_longer(c(DP, SP, AS, CGI), names_to = "metric", values_to = "value") %>%
+      mutate(
+        metric   = factor(metric, levels = c("DP", "SP", "AS", "CGI")),
+        category = factor(category, levels = rev(cat_order)),  # top CGI at top
+        val_capped = pmin(value, 1.5)
+      )
+
+    p <- ggplot(d_long,
+                aes(x = metric, y = category, fill = val_capped,
+                    text = paste0(category, " — ", metric,
+                                  ": ", round(value, 3)))) +
+      geom_tile(colour = "white", linewidth = 0.4) +
       scale_fill_gradient2(
         low = "#4dac26", mid = "#fee08b", high = "#d73027",
-        midpoint = 0.5, limits = c(0, 1.5), na.value = "#999999",
-        name = "CGI"
+        midpoint = 0.5, limits = c(0, 1.5), na.value = "#cccccc",
+        name = "Score"
       ) +
-      scale_y_continuous(expand = c(0, 0)) +
+      scale_x_discrete(expand = c(0, 0)) +
+      scale_y_discrete(expand = c(0, 0)) +
       labs(x = NULL, y = NULL) +
-      coord_flip() +
       theme_minimal(base_size = 11) +
-      theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),
-            panel.grid = element_blank(), legend.position = "right")
+      theme(panel.grid = element_blank(),
+            axis.text.x = element_text(face = "bold"),
+            legend.position = "right")
 
-    ggplotly(p, tooltip = "text") %>% layout(showlegend = TRUE)
+    ggplotly(p, tooltip = "text", height = 600) %>%
+      layout(showlegend = TRUE, margin = list(l = 180))
   })
 
   # ════════════════════════════════════════════════════════════════════════════
