@@ -594,9 +594,10 @@ server <- function(input, output, session) {
     col_names  <- c("DP", "SP", "AS", "CGI")
     col_labels <- c("Demand Pressure", "Supply Pressure", "Access Stress", "CGI")
 
-    # Ascending CGI → plotly puts lowest at bottom; autorange="reversed" flips so
-    # highest CGI appears at the top of the chart
-    cat_order <- d_wide %>% arrange(CGI) %>% pull(category)
+    # Descending CGI → plotly heatmap puts y[1] at top natively, so highest
+    # CGI appears at the top without needing autorange="reversed" (which breaks
+    # doubleClick reset by overwriting the reversed state with autorange=true)
+    cat_order <- d_wide %>% arrange(desc(CGI)) %>% pull(category)
     d_ord     <- d_wide %>% arrange(match(category, cat_order))
 
     z_raw    <- as.matrix(d_ord[, col_names])
@@ -634,12 +635,11 @@ server <- function(input, output, session) {
       layout(
         xaxis      = list(title = "", tickfont = list(size = 12, color = "#333"),
                           side = "bottom"),
-        yaxis      = list(title = "", autorange = "reversed",
-                          tickfont = list(size = 10)),
+        yaxis      = list(title = "", tickfont = list(size = 10)),
         margin     = list(l = 230, t = 10, b = 80, r = 100),
         uirevision = paste(rv$province, sel_year())
       ) %>%
-      config(doubleClick = "reset", displayModeBar = TRUE)
+      config(doubleClick = "reset", scrollZoom = FALSE, displayModeBar = TRUE)
   })
 
   # ════════════════════════════════════════════════════════════════════════════
