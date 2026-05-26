@@ -30,6 +30,8 @@ cgi_rollup  <- readRDS(file.path(PROCESSED_DIR, "cgi_rollup.rds"))
 supply      <- readRDS(file.path(PROCESSED_DIR, "supply.rds"))
 M_long      <- readRDS(file.path(PROCESSED_DIR, "M_long.rds"))
 norm_ref    <- readRDS(file.path(PROCESSED_DIR, "norm_reference.rds"))
+workforce_dbc <- readRDS(file.path(PROCESSED_DIR, "workforce.rds")) %>%
+  filter(sector %in% DBC_SECTORS, year == YEAR_BASE)
 
 # Province rollup weights (2025 DBC volume shares)
 dbc_weights <- cgi_central %>%
@@ -308,10 +310,7 @@ for (direction in c("plus", "minus")) {
     mutate(share = share_adj) %>%
     select(-share_adj)
 
-  # Recompute FTE_relevant with perturbed M
-  workforce_dbc <- readRDS(file.path(PROCESSED_DIR, "workforce.rds")) %>%
-    filter(sector %in% DBC_SECTORS, year == YEAR_BASE)
-
+  # Recompute FTE_relevant with perturbed M (workforce_dbc loaded at top of script)
   fte_perturbed <- workforce_dbc %>%
     inner_join(M_perturbed, by = "sector", relationship = "many-to-many") %>%
     group_by(province, category) %>%
