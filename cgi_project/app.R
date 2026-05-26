@@ -173,6 +173,16 @@ server <- function(input, output, session) {
     cgi_rollup %>% filter(year == sel_year())
   })
 
+  # Continuous color palette — same scale used by both the map and the rankings
+  map_pal <- reactive({
+    ps <- prov_summary()
+    colorNumeric(
+      palette  = c("#4dac26", "#fee08b", "#d73027"),
+      domain   = range(ps$CGI, na.rm = TRUE),
+      na.color = "#999999"
+    )
+  })
+
   # Detail (province × category) for the selected year
   detail_yr <- reactive({
     cgi_detail %>% filter(year == sel_year())
@@ -278,7 +288,9 @@ server <- function(input, output, session) {
       column(4,
         card(
           card_header("Province Rankings"),
-          div(style = "max-height:520px; overflow-y:auto;",
+          div(style = "font-size:0.78rem; color:#666; padding:4px 10px 2px;",
+              "Ranked by CGI score — 1 = highest care gap"),
+          div(style = "max-height:500px; overflow-y:auto;",
               uiOutput("prov_ranking"))
         )
       )
@@ -298,12 +310,7 @@ server <- function(input, output, session) {
       map_data <- prov_sf %>%
         left_join(ps %>% select(province, CGI), by = "province")
 
-      cgi_range <- range(ps$CGI, na.rm = TRUE)
-      pal <- colorNumeric(
-        palette  = c("#4dac26", "#fee08b", "#d73027"),
-        domain   = cgi_range,
-        na.color = "#999999"
-      )
+      pal <- map_pal()
 
       leaflet(map_data) %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
@@ -323,7 +330,7 @@ server <- function(input, output, session) {
         addLegend(
           pal      = pal,
           values   = ~CGI,
-          title    = paste("CGI", sel_year()),
+          title    = paste0("CGI Score (", sel_year(), ")<br><small style='font-weight:normal'>0 = low gap &bull; 1+ = critical</small>"),
           position = "bottomright",
           labFormat = labelFormat(digits = 2)
         )
@@ -337,12 +344,7 @@ server <- function(input, output, session) {
     map_data <- prov_sf %>%
       left_join(ps %>% select(province, CGI), by = "province")
 
-    cgi_range <- range(ps$CGI, na.rm = TRUE)
-    pal <- colorNumeric(
-      palette  = c("#4dac26", "#fee08b", "#d73027"),
-      domain   = cgi_range,
-      na.color = "#999999"
-    )
+    pal <- map_pal()
 
     leafletProxy("choropleth") %>%
       clearShapes() %>%
@@ -363,7 +365,7 @@ server <- function(input, output, session) {
       addLegend(
         pal      = pal,
         values   = map_data$CGI,
-        title    = paste("CGI", sel_year()),
+        title    = paste0("CGI Score (", sel_year(), ")<br><small style='font-weight:normal'>0 = low gap &bull; 1+ = critical</small>"),
         position = "bottomright",
         labFormat = labelFormat(digits = 2)
       )
@@ -392,7 +394,7 @@ server <- function(input, output, session) {
                          r$province, "',{priority:'event'})"),
         span(paste0(i, ". ", r$province), style = "font-weight:500;"),
         span(class = "score-badge",
-             style = paste0("background:", score_color(r$CGI)),
+             style = paste0("background:", map_pal()(r$CGI)),
              round(r$CGI, 3))
       )
     })
@@ -527,7 +529,8 @@ server <- function(input, output, session) {
 
     ggplotly(p, tooltip = "text", source = "pillar_src") %>%
       event_register("plotly_click") %>%
-      layout(clickmode = "event+select")
+      layout(clickmode = "event+select") %>%
+      config(doubleClick = "reset", displayModeBar = TRUE)
   })
 
   observeEvent(event_data("plotly_click", source = "pillar_src"), {
@@ -578,41 +581,58 @@ server <- function(input, output, session) {
   })
 
   output$specialism_heatmap <- renderPlotly({
-    # Specialism × pillar matrix — rows ordered by CGI descending
     d_wide <- detail_yr() %>%
       filter(province == rv$province) %>%
       select(category, DP, SP, AS, CGI)
 
-    cat_order <- d_wide %>% arrange(desc(CGI)) %>% pull(category)
+    col_names  <- c("DP", "SP", "AS", "CGI")
+    col_labels <- c("Demand Pressure", "Supply Pressure", "Access Stress", "CGI")
 
-    d_long <- d_wide %>%
-      pivot_longer(c(DP, SP, AS, CGI), names_to = "metric", values_to = "value") %>%
-      mutate(
-        metric   = factor(metric, levels = c("DP", "SP", "AS", "CGI")),
-        category = factor(category, levels = rev(cat_order)),  # top CGI at top
-        val_capped = pmin(value, 1.5)
+    # Ascending CGI → plotly puts lowest at bottom; autorange="reversed" flips so
+    # highest CGI appears at the top of the chart
+    cat_order <- d_wide %>% arrange(CGI) %>% pull(category)
+    d_ord     <- d_wide %>% arrange(match(category, cat_order))
+
+    z_raw    <- as.matrix(d_ord[, col_names])
+    z_capped <- pmin(z_raw, 1.5)
+
+    # Build hover text matrix aligned with z[row, col]
+    hover <- matrix("", nrow = nrow(z_raw), ncol = ncol(z_raw))
+    for (i in seq_len(nrow(z_raw))) {
+      for (j in seq_len(ncol(z_raw))) {
+        hover[i, j] <- paste0(d_ord$category[i], " \u2014 ",
+                               col_labels[j], ": ", round(z_raw[i, j], 3))
+      }
+    }
+
+    plot_ly(
+      x         = col_labels,
+      y         = cat_order,
+      z         = z_capped,
+      type      = "heatmap",
+      colorscale = list(
+        list(0.0,        "#4dac26"),
+        list(1 / 3,      "#fee08b"),
+        list(1.0,        "#d73027")
+      ),
+      zmin      = 0,
+      zmax      = 1.5,
+      text      = hover,
+      hoverinfo = "text",
+      colorbar  = list(
+        title     = "Score\n(\u22641.5)",
+        titlefont = list(size = 12),
+        len       = 0.6
       )
-
-    p <- ggplot(d_long,
-                aes(x = metric, y = category, fill = val_capped,
-                    text = paste0(category, " — ", metric,
-                                  ": ", round(value, 3)))) +
-      geom_tile(colour = "white", linewidth = 0.4) +
-      scale_fill_gradient2(
-        low = "#4dac26", mid = "#fee08b", high = "#d73027",
-        midpoint = 0.5, limits = c(0, 1.5), na.value = "#cccccc",
-        name = "Score"
-      ) +
-      scale_x_discrete(expand = c(0, 0)) +
-      scale_y_discrete(expand = c(0, 0)) +
-      labs(x = NULL, y = NULL) +
-      theme_minimal(base_size = 11) +
-      theme(panel.grid = element_blank(),
-            axis.text.x = element_text(face = "bold"),
-            legend.position = "right")
-
-    ggplotly(p, tooltip = "text", height = 600) %>%
-      layout(showlegend = TRUE, margin = list(l = 180))
+    ) %>%
+      layout(
+        xaxis  = list(title = "", tickfont = list(size = 12, color = "#333"),
+                      side = "bottom"),
+        yaxis  = list(title = "", autorange = "reversed",
+                      tickfont = list(size = 10)),
+        margin = list(l = 230, t = 10, b = 80, r = 100)
+      ) %>%
+      config(doubleClick = "reset", displayModeBar = TRUE)
   })
 
   # ════════════════════════════════════════════════════════════════════════════
@@ -696,7 +716,8 @@ server <- function(input, output, session) {
       theme_minimal(base_size = 13) +
       theme(panel.grid.minor = element_blank())
 
-    ggplotly(p, tooltip = "text")
+    ggplotly(p, tooltip = "text") %>%
+      config(doubleClick = "reset", displayModeBar = TRUE)
   })
 
   output$indicator_cards <- renderUI({
@@ -859,7 +880,9 @@ server <- function(input, output, session) {
       theme_minimal(base_size = 12) +
       theme(panel.grid.minor = element_blank())
 
-    ggplotly(p, tooltip = "text") %>% layout(showlegend = FALSE)
+    ggplotly(p, tooltip = "text") %>%
+      layout(showlegend = FALSE) %>%
+      config(doubleClick = "reset", displayModeBar = TRUE)
   })
 
   output$rootcause_specialism <- renderPlotly({
@@ -899,7 +922,8 @@ server <- function(input, output, session) {
       theme_minimal(base_size = 11) +
       theme(panel.grid.minor = element_blank())
 
-    ggplotly(p, tooltip = "text")
+    ggplotly(p, tooltip = "text") %>%
+      config(doubleClick = "reset", displayModeBar = TRUE)
   })
 }
 

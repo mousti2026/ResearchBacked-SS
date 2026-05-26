@@ -41,9 +41,7 @@ cgi_wide <- dp1 %>%
   full_join(dp2, by = c("province", "specialism")) %>%
   full_join(dp3, by = c("province", "specialism")) %>%
   full_join(sp1, by = c("province", "specialism")) %>%
-  full_join(sp2, by = c("province", "specialism"))
-
-cgi_wide <- cgi_wide %>%
+  full_join(sp2, by = c("province", "specialism")) %>%
   full_join(sp3, by = c("province", "specialism")) %>%
   left_join(as1, by = c("province", "specialism")) %>%  # left_join: AS only where available
   left_join(as2, by = c("province", "specialism")) %>%
