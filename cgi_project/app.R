@@ -491,6 +491,7 @@ server <- function(input, output, session) {
   })
 
   output$pillar_plot <- renderPlotly({
+    req(rv$view == "pillar", !is.null(rv$province))
     ps  <- pillar_scores()
     nat <- nat_avg()
 
@@ -529,11 +530,15 @@ server <- function(input, output, session) {
 
     ggplotly(p, tooltip = "text", source = "pillar_src") %>%
       event_register("plotly_click") %>%
-      layout(clickmode = "event+select") %>%
+      layout(
+        clickmode  = "event+select",
+        uirevision = paste(rv$province, sel_year(), input$sel_category %||% "All")
+      ) %>%
       config(doubleClick = "reset", displayModeBar = TRUE)
   })
 
   observeEvent(event_data("plotly_click", source = "pillar_src"), {
+    req(rv$view == "pillar")
     click <- event_data("plotly_click", source = "pillar_src")
     if (!is.null(click)) {
       pillar_map <- c("Demand\nPressure" = "DP",
@@ -581,6 +586,7 @@ server <- function(input, output, session) {
   })
 
   output$specialism_heatmap <- renderPlotly({
+    req(rv$view == "pillar", !is.null(rv$province))
     d_wide <- detail_yr() %>%
       filter(province == rv$province) %>%
       select(category, DP, SP, AS, CGI)
@@ -626,11 +632,12 @@ server <- function(input, output, session) {
       )
     ) %>%
       layout(
-        xaxis  = list(title = "", tickfont = list(size = 12, color = "#333"),
-                      side = "bottom"),
-        yaxis  = list(title = "", autorange = "reversed",
-                      tickfont = list(size = 10)),
-        margin = list(l = 230, t = 10, b = 80, r = 100)
+        xaxis      = list(title = "", tickfont = list(size = 12, color = "#333"),
+                          side = "bottom"),
+        yaxis      = list(title = "", autorange = "reversed",
+                          tickfont = list(size = 10)),
+        margin     = list(l = 230, t = 10, b = 80, r = 100),
+        uirevision = paste(rv$province, sel_year())
       ) %>%
       config(doubleClick = "reset", displayModeBar = TRUE)
   })
@@ -672,6 +679,7 @@ server <- function(input, output, session) {
   })
 
   output$indicator_plot <- renderPlotly({
+    req(rv$view == "indicator", !is.null(rv$province), !is.null(rv$pillar))
     d    <- filtered_data()
     inds <- ind_meta %>% filter(pillar == rv$pillar)
     nat  <- nat_avg()
@@ -717,6 +725,8 @@ server <- function(input, output, session) {
       theme(panel.grid.minor = element_blank())
 
     ggplotly(p, tooltip = "text") %>%
+      layout(uirevision = paste(rv$province, rv$pillar, sel_year(),
+                                input$sel_category %||% "All")) %>%
       config(doubleClick = "reset", displayModeBar = TRUE)
   })
 
@@ -854,6 +864,7 @@ server <- function(input, output, session) {
   })
 
   output$rootcause_dist <- renderPlotly({
+    req(rv$view == "rootcause", !is.null(rv$indicator))
     # Province-level averages of this indicator
     prov_ind <- detail_yr() %>%
       group_by(province) %>%
@@ -881,11 +892,13 @@ server <- function(input, output, session) {
       theme(panel.grid.minor = element_blank())
 
     ggplotly(p, tooltip = "text") %>%
-      layout(showlegend = FALSE) %>%
+      layout(showlegend = FALSE,
+             uirevision = paste(rv$indicator, sel_year())) %>%
       config(doubleClick = "reset", displayModeBar = TRUE)
   })
 
   output$rootcause_specialism <- renderPlotly({
+    req(rv$view == "rootcause", !is.null(rv$province), !is.null(rv$indicator))
     d <- detail_yr() %>%
       filter(province == rv$province, !is.na(.data[[rv$indicator]]))
 
@@ -923,6 +936,7 @@ server <- function(input, output, session) {
       theme(panel.grid.minor = element_blank())
 
     ggplotly(p, tooltip = "text") %>%
+      layout(uirevision = paste(rv$province, rv$indicator, sel_year())) %>%
       config(doubleClick = "reset", displayModeBar = TRUE)
   })
 }
