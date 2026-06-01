@@ -4,16 +4,11 @@
 #
 # min_2025 and max_2025 are computed across ALL (p, s) cells at t = 2025 ONLY.
 # These reference values are frozen and reused for 2030/2035 projections.
-# DP and AS indicators are clipped to [0, 1]:
-#   - DP2/DP3 are change-from-baseline anchored to 2035 max by design → naturally bounded
-#   - DP1 population growth does not meaningfully exceed 2025 worst-case
-#   - AS is a 2025 snapshot held constant → always within its own range
-# SP indicators are LEFT UNBOUNDED:
-#   - SP1/SP3 measure workforce shortages that worsen structurally beyond 2025 reference
-#   - Values > 1 carry genuine information: shortage pressure exceeds the 2025 worst-case
-#   - Clipping SP would mask the primary deterioration signal the index is designed to capture
-#   - Hotspot classification uses the empirical 67th-percentile threshold (not a fixed value)
-#     so the composite CGI remains interpretable even when SP > 1
+# All indicators use the same normalization: min-max anchored to the 2025 cross-section.
+# No clipping is applied. Values > 1 in future years are valid and meaningful — they
+# signal that pressure has exceeded the worst case observed at baseline (2025).
+# This applies uniformly across all 9 indicators for methodological consistency.
+# The hotspot threshold of 0.66 is used to identify high-pressure cells.
 #
 # For AS3_raw (negated provider density), the inversion is already embedded in the raw
 # value (multiplied by -1 in 05_access.R), so standard min-max applies.
@@ -100,14 +95,8 @@ for (i in seq_along(RAW_COLS)) {
   if (ref$degenerate) {
     indicators_norm[[norm_col]] <- if_else(!is.na(indicators[[raw_col]]), 0.5, NA_real_)
   } else {
-    raw_norm <- (indicators[[raw_col]] - ref$min_ref) / ref$range_ref
-    # SP indicators: unbounded — preserves structural deterioration signal beyond 2025
-    # DP and AS indicators: clipped to [0, 1] — bounded by design or data availability
-    indicators_norm[[norm_col]] <- if (norm_col %in% c("SP1", "SP2", "SP3")) {
-      raw_norm
-    } else {
-      pmin(pmax(raw_norm, 0), 1)
-    }
+    indicators_norm[[norm_col]] <-
+      (indicators[[raw_col]] - ref$min_ref) / ref$range_ref
   }
 }
 
@@ -160,4 +149,4 @@ saveRDS(norm_ref %>% select(indicator, min_ref, max_ref, range_ref, degenerate),
 message("\n=== 07_normalize.R complete ===")
 message("  indicators_norm.rds : ", nrow(indicators_norm), " rows")
 message("  norm_reference.rds  : 9 indicator min/max reference values (2025)")
-message("  DP + AS indicators: clipped to [0,1]; SP indicators: unbounded")
+message("  All 9 indicators: unbounded min-max (values >1 valid in future years)")

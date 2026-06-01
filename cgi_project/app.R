@@ -37,11 +37,9 @@ cgi_detail <- readRDS(file.path(processed_dir, "cgi.rds"))
 
 YEARS <- sort(unique(cgi_rollup$year))   # 2025, 2030, 2035
 
-# Tercile thresholds from 2025 province-level CGI distribution
-# (consistent with hotspot classification in 11_hotspots.R)
-cgi_2025_prov   <- cgi_rollup$CGI[cgi_rollup$year == 2025 & !is.na(cgi_rollup$CGI)]
-CGI_THRESH_LOW  <- quantile(cgi_2025_prov, probs = 1/3)  # 33rd percentile
-CGI_THRESH_HIGH <- quantile(cgi_2025_prov, probs = 2/3)  # 67th percentile (hotspot cutoff)
+# Fixed thresholds consistent with the [0,1] normalization scale
+CGI_THRESH_LOW  <- 0.33
+CGI_THRESH_HIGH <- 0.66
 
 # ── 2. Indicator metadata ─────────────────────────────────────────────────────
 ind_meta <- tibble::tribble(
@@ -310,7 +308,7 @@ server <- function(input, output, session) {
             card(
               card_header(paste(
                 "CGI by Province × Specialism —", sel_year(),
-                "| CGI >", round(CGI_THRESH_HIGH, 2), "= hotspot (67th pct) | Click a cell to explore province"
+                "| CGI > 0.66 = hotspot | Click a cell to explore province"
               )),
               p(style = "color:#666; font-size:0.85rem; padding:4px 16px 0;",
                 "Province rollup scores (map view) are volume-weighted averages that mask
@@ -550,8 +548,7 @@ server <- function(input, output, session) {
         labels = number_format(accuracy = 0.01)
       ) +
       labs(x = NULL, y = "Normalised score (values >1 valid at 2030/2035)",
-           caption = paste0("White dot = national average | dashed = hotspot threshold (",
-                            round(CGI_THRESH_HIGH, 2), " = 67th percentile, 2025)")) +
+           caption = "White dot = national average | dashed = 0.66 hotspot threshold") +
       theme_minimal(base_size = 13) +
       theme(panel.grid.minor = element_blank())
 

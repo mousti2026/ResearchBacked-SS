@@ -24,24 +24,22 @@ cgi           <- readRDS(file.path(PROCESSED_DIR, "cgi.rds"))
 cgi_intervals <- readRDS(file.path(PROCESSED_DIR, "cgi_intervals.rds"))
 cgi_rollup    <- readRDS(file.path(PROCESSED_DIR, "cgi_rollup.rds"))
 
-# ── Step 1: CGI threshold — 67th percentile of 2025 province-level distribution ─
-# The threshold is derived from the province-level rollup (12 provinces), not
-# the cell-level distribution. Province rollup CGI represents the aggregate
-# care gap signal as experienced at the policy-relevant geographic unit.
-# Using the province-level distribution ensures the hotspot cutoff reflects
-# meaningful between-province variation rather than specialism-level noise.
+# ── Step 1: CGI threshold — fixed at 0.66 ─────────────────────────────────────
+# 0.66 corresponds to the upper tercile of a [0, 1] scale, consistent with the
+# normalization reference. Since indicators are unbounded above 1 in future years,
+# the fixed threshold ensures a stable, scale-anchored cutoff across all years.
 message("Computing hotspot thresholds...")
 
-cgi_2025_prov <- cgi_rollup %>%
+CGI_THRESHOLD <- 0.66
+message("  CGI threshold (fixed): ", CGI_THRESHOLD)
+
+cgi_2025_vals <- cgi %>%
   filter(year == 2025, !is.na(CGI)) %>%
   pull(CGI)
-
-CGI_THRESHOLD <- quantile(cgi_2025_prov, probs = 2/3)  # 67th percentile (province level)
-message("  67th-percentile CGI threshold (2025, province level): ", round(CGI_THRESHOLD, 4))
-message("  Province CGI 2025 distribution: ",
-        "p33=", round(quantile(cgi_2025_prov, 0.33), 3),
-        " p67=", round(CGI_THRESHOLD, 3),
-        " p90=", round(quantile(cgi_2025_prov, 0.90), 3))
+message("  CGI 2025 distribution: ",
+        "p33=", round(quantile(cgi_2025_vals, 0.33), 3),
+        " p66=", round(quantile(cgi_2025_vals, 0.66), 3),
+        " p90=", round(quantile(cgi_2025_vals, 0.90), 3))
 
 # ── Step 2: Join PI lower bound ────────────────────────────────────────────────
 hotspots <- cgi %>%
