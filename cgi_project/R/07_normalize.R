@@ -4,11 +4,9 @@
 #
 # min_2025 and max_2025 are computed across ALL (p, s) cells at t = 2025 ONLY.
 # These reference values are frozen and reused for 2030/2035 projections.
-# All indicators use the same normalization: min-max anchored to the 2025 cross-section.
-# No clipping is applied. Values > 1 in future years are valid and meaningful — they
-# signal that pressure has exceeded the worst case observed at baseline (2025).
-# This applies uniformly across all 9 indicators for methodological consistency.
-# The hotspot threshold of 0.66 is used to identify high-pressure cells.
+# All indicators are clipped to [0, 1] after min-max normalization.
+# The 2025 cross-section is the fixed reference (min/max anchored to baseline).
+# Values are bounded so that all pillars and CGI remain in [0, 1] for all years.
 #
 # For AS3_raw (negated provider density), the inversion is already embedded in the raw
 # value (multiplied by -1 in 05_access.R), so standard min-max applies.
@@ -96,7 +94,7 @@ for (i in seq_along(RAW_COLS)) {
     indicators_norm[[norm_col]] <- if_else(!is.na(indicators[[raw_col]]), 0.5, NA_real_)
   } else {
     indicators_norm[[norm_col]] <-
-      (indicators[[raw_col]] - ref$min_ref) / ref$range_ref
+      pmin(pmax((indicators[[raw_col]] - ref$min_ref) / ref$range_ref, 0), 1)
   }
 }
 
@@ -149,4 +147,4 @@ saveRDS(norm_ref %>% select(indicator, min_ref, max_ref, range_ref, degenerate),
 message("\n=== 07_normalize.R complete ===")
 message("  indicators_norm.rds : ", nrow(indicators_norm), " rows")
 message("  norm_reference.rds  : 9 indicator min/max reference values (2025)")
-message("  All 9 indicators: unbounded min-max (values >1 valid in future years)")
+message("  All 9 indicators: min-max normalized and clipped to [0,1]")
