@@ -25,12 +25,24 @@ cgi_intervals <- readRDS(file.path(PROCESSED_DIR, "cgi_intervals.rds"))
 cgi_rollup    <- readRDS(file.path(PROCESSED_DIR, "cgi_rollup.rds"))
 
 # ── Step 1: CGI threshold — 2025 empirical maximum ────────────────────────────
-# Since all indicators are clipped to [0,1], future CGI values are bounded by
-# the 2025 normalization ceiling. The 2025 empirical maximum is therefore the
-# most meaningful threshold: a cell is classified as a hotspot when its projected
-# CGI exceeds the worst case observed across any province × specialism in 2025.
-# This anchors the hotspot definition directly to observed baseline conditions
-# rather than an arbitrary point on the [0,1] scale.
+# All nine indicators are min-max normalized against the 2025 cross-sectional
+# distribution and clipped to [0,1], so the composite CGI inherits this scale:
+# 0 = minimum observed pressure at baseline, 1 = maximum observed pressure at
+# baseline. The 2025 empirical maximum (θ < 1) is less than 1 because no single
+# cell simultaneously maximizes all nine indicators.
+#
+# Setting the threshold at θ = max(CGI_2025) has a direct substantive meaning:
+# a cell is a hotspot when its projected care gap pressure EXCEEDS the worst case
+# observed anywhere in the Netherlands in 2025. This is an exceedance criterion —
+# it flags genuinely novel deterioration rather than reconfirming known baseline
+# stress. By construction, no cell is a hotspot at 2025 itself, preserving the
+# baseline year as a clean reference period.
+#
+# This is preferable to an arbitrary fixed threshold (e.g., 0.66) because it is
+# fully anchored to observed data. It is also more conservative than a
+# distributional threshold (e.g., top tercile) since the empirical maximum lies
+# above the 90th percentile of the 2025 distribution (p90 ≈ 0.43), ensuring only
+# cells with substantial projected deterioration are flagged.
 message("Computing hotspot thresholds...")
 
 cgi_2025_vals <- cgi %>%
