@@ -4,7 +4,7 @@
 #
 # min_2025 and max_2025 are computed across ALL (p, s) cells at t = 2025 ONLY.
 # These reference values are frozen and reused for 2030/2035 projections.
-# Values > 1 or < 0 in future years are VALID (deterioration/improvement past 2025 range).
+# All normalized values are clipped to [0, 1] — pillars and CGI stay bounded.
 #
 # For AS3_raw (negated provider density), the inversion is already embedded in the raw
 # value (multiplied by -1 in 05_access.R), so standard min-max applies.
@@ -92,7 +92,7 @@ for (i in seq_along(RAW_COLS)) {
     indicators_norm[[norm_col]] <- if_else(!is.na(indicators[[raw_col]]), 0.5, NA_real_)
   } else {
     indicators_norm[[norm_col]] <-
-      (indicators[[raw_col]] - ref$min_ref) / ref$range_ref
+      pmin(pmax((indicators[[raw_col]] - ref$min_ref) / ref$range_ref, 0), 1)
   }
 }
 
@@ -145,4 +145,4 @@ saveRDS(norm_ref %>% select(indicator, min_ref, max_ref, range_ref, degenerate),
 message("\n=== 07_normalize.R complete ===")
 message("  indicators_norm.rds : ", nrow(indicators_norm), " rows")
 message("  norm_reference.rds  : 9 indicator min/max reference values (2025)")
-message("  All 9 indicators normalized; 2025 values in [0,1]; future values unbounded")
+message("  All 9 indicators normalized and clipped to [0,1] for all years")
