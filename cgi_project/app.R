@@ -44,6 +44,14 @@ cgi_2025_vals   <- cgi_detail$CGI[cgi_detail$year == 2025 & !is.na(cgi_detail$CG
 CGI_THRESH_HIGH <- max(cgi_2025_vals)   # hotspot cutoff
 CGI_THRESH_LOW  <- median(cgi_2025_vals) # moderate/low boundary
 
+province_mc_data <- tryCatch(
+  readRDS(file.path(processed_dir, "province_mc.rds")),
+  error = function(e) {
+    message("province_mc.rds not found — uncertainty markers disabled")
+    NULL
+  }
+)
+
 # ── 2. Indicator metadata ─────────────────────────────────────────────────────
 ind_meta <- tibble::tribble(
   ~col,   ~label,                      ~pillar,  ~pillar_label,
@@ -88,6 +96,81 @@ prov_sf <- tryCatch({
   message("WFS unavailable (", conditionMessage(e), ") — map will show fallback text")
   NULL
 })
+
+# Province centroids for uncertainty triangle markers
+prov_centroids <- if (!is.null(prov_sf)) {
+  suppressWarnings(sf::st_centroid(prov_sf)) %>%
+    mutate(lng = sf::st_coordinates(.)[, 1],
+           lat = sf::st_coordinates(.)[, 2]) %>%
+    sf::st_drop_geometry() %>%
+    select(province, lng, lat)
+} else NULL
+
+# SVG triangle icon factory
+.triangle_icon <- function(fill_color, size = 22L) {
+  half <- size %/% 2L
+  svg  <- paste0(
+    "<svg xmlns='http://www.w3.org/2000/svg' width='", size, "' height='", size, "'>",
+    "<polygon points='", half, ",2 ", size - 2L, ",", size - 2L, " 2,", size - 2L,
+    "' fill='", fill_color, "' stroke='white' stroke-width='1.5'/>",
+    "</svg>"
+  )
+  uri <- paste0("data:image/svg+xml;charset=utf-8,",
+    gsub("#", "%23", gsub("'", "%27", gsub(" ", "%20",
+    gsub("<", "%3C",  gsub(">", "%3E", gsub("/", "%2F", svg)))))))
+  makeIcon(iconUrl = uri, iconWidth = size, iconHeight = size,
+           iconAnchorX = half, iconAnchorY = half)
+}
+unc_icons <- list(
+  Low    = .triangle_icon("#4dac26"),
+  Medium = .triangle_icon("#fc8d59"),
+  High   = .triangle_icon("#d73027")
+)
+
+# CSS-triangle HTML legend for uncertainty tiers
+unc_legend_html <- paste0(
+  "<div style='background:white;padding:10px 14px;border-radius:8px;",
+  "box-shadow:0 1px 5px rgba(0,0,0,.3);font-size:0.82rem;line-height:2;'>",
+  "<b style='font-size:0.84rem;'>Forecast Uncertainty</b><br>",
+  "<span style='display:inline-block;width:0;height:0;",
+  "border-left:7px solid transparent;border-right:7px solid transparent;",
+  "border-bottom:12px solid #4dac26;margin-right:5px;vertical-align:middle;'></span>Low<br>",
+  "<span style='display:inline-block;width:0;height:0;",
+  "border-left:7px solid transparent;border-right:7px solid transparent;",
+  "border-bottom:12px solid #fc8d59;margin-right:5px;vertical-align:middle;'></span>Medium<br>",
+  "<span style='display:inline-block;width:0;height:0;",
+  "border-left:7px solid transparent;border-right:7px solid transparent;",
+  "border-bottom:12px solid #d73027;margin-right:5px;vertical-align:middle;'></span>High<br>",
+  "<span style='font-size:0.72rem;color:#777;'>(90% PI width of CGI)</span>",
+  "</div>"
+)
+
+# Helper: append uncertainty triangle markers to leaflet / leafletProxy
+.add_unc_markers <- function(map_obj, unc_data, centroids) {
+  if (is.null(centroids) || is.null(unc_data) || nrow(unc_data) == 0) return(map_obj)
+  pts <- centroids %>%
+    left_join(
+      unc_data %>% select(province, uncertainty_tier, CGI_lo90, CGI_hi90, PI_width),
+      by = "province"
+    ) %>%
+    filter(!is.na(uncertainty_tier))
+  for (tier_name in c("Low", "Medium", "High")) {
+    sub <- pts %>% filter(uncertainty_tier == tier_name)
+    if (nrow(sub) > 0) {
+      map_obj <- map_obj %>%
+        addMarkers(
+          data  = sub,
+          lng   = ~lng, lat = ~lat,
+          icon  = unc_icons[[tier_name]],
+          label = ~paste0(province, " — ", tier_name, " uncertainty",
+                          " | 90% PI: [", round(CGI_lo90, 3), ", ",
+                          round(CGI_hi90, 3), "]  (width: ", round(PI_width, 3), ")"),
+          group = "uncertainty_markers"
+        )
+    }
+  }
+  map_obj
+}
 
 # ── 4. Color helpers ──────────────────────────────────────────────────────────
 score_color <- function(x) {
@@ -216,6 +299,12 @@ server <- function(input, output, session) {
     d
   })
 
+  # Province-level MC intervals for the selected year
+  prov_uncertainty <- reactive({
+    if (is.null(province_mc_data)) return(tibble(province = character()))
+    province_mc_data %>% filter(year == sel_year())
+  })
+
   # Pillar scores that respect the category filter:
   # — "All": use DBC-weighted rollup (matches choropleth)
   # — specific category: use that category's own DP/SP/AS/CGI
@@ -340,7 +429,7 @@ server <- function(input, output, session) {
 
       pal <- map_pal()
 
-      leaflet(map_data) %>%
+      base_map <- leaflet(map_data) %>%
         addProviderTiles(providers$CartoDB.Positron) %>%
         setView(lng = 5.3, lat = 52.3, zoom = 7) %>%
         addPolygons(
@@ -356,26 +445,29 @@ server <- function(input, output, session) {
           labelOptions = labelOptions(style = list("font-size" = "13px"))
         ) %>%
         addLegend(
-          pal      = pal,
-          values   = ~CGI,
-          title    = paste0("CGI Score (", sel_year(), ")<br><small style='font-weight:normal'>0 = low gap &bull; 1 = critical</small>"),
-          position = "bottomright",
+          pal       = pal,
+          values    = ~CGI,
+          title     = paste0("CGI Score (", sel_year(), ")<br><small style='font-weight:normal'>0 = low gap &bull; 1 = critical</small>"),
+          position  = "bottomright",
           labFormat = labelFormat(digits = 2)
-        )
+        ) %>%
+        addControl(unc_legend_html, position = "topleft")
+
+      .add_unc_markers(base_map, prov_uncertainty(), prov_centroids)
     }
   })
 
-  # Re-draw polygons when year changes (without full map reset)
+  # Re-draw polygons + uncertainty markers when year changes (without full map reset)
   observeEvent(sel_year(), {
     req(!is.null(prov_sf), rv$view == "map")
-    ps  <- prov_summary()
+    ps       <- prov_summary()
     map_data <- prov_sf %>%
       left_join(ps %>% select(province, CGI), by = "province")
-
     pal <- map_pal()
 
-    leafletProxy("choropleth") %>%
+    proxy <- leafletProxy("choropleth") %>%
       clearShapes() %>%
+      clearMarkers() %>%
       clearControls() %>%
       addPolygons(
         data         = map_data,
@@ -391,12 +483,15 @@ server <- function(input, output, session) {
         labelOptions = labelOptions(style = list("font-size" = "13px"))
       ) %>%
       addLegend(
-        pal      = pal,
-        values   = map_data$CGI,
-        title    = paste0("CGI Score (", sel_year(), ")<br><small style='font-weight:normal'>0 = low gap &bull; 1 = critical</small>"),
-        position = "bottomright",
+        pal       = pal,
+        values    = map_data$CGI,
+        title     = paste0("CGI Score (", sel_year(), ")<br><small style='font-weight:normal'>0 = low gap &bull; 1 = critical</small>"),
+        position  = "bottomright",
         labFormat = labelFormat(digits = 2)
-      )
+      ) %>%
+      addControl(unc_legend_html, position = "topleft")
+
+    .add_unc_markers(proxy, prov_uncertainty(), prov_centroids)
   }, ignoreInit = TRUE)
 
   observeEvent(input$choropleth_shape_click, {
@@ -468,6 +563,21 @@ server <- function(input, output, session) {
             plotlyOutput("specialism_heatmap", height = "620px")
           )
         )
+      ),
+      fluidRow(
+        column(12,
+          card(
+            card_header(
+              "Monte Carlo Uncertainty — CGI 90% Prediction Interval"
+            ),
+            p(style = "color:#666; font-size:0.85rem; padding:4px 16px 0;",
+              paste0("Based on 1,000 MC draws varying pillar weights (Dirichlet \u03b1=1),",
+                     " productivity bridge \u03c6 (LogNormal \u00b10.15), and contact",
+                     " rates \u03c8 (\u00b110%). Province-level aggregation using DBC",
+                     " volume weights. Error bars show 90% PI (5th\u201395th percentile).")),
+            plotlyOutput("uncertainty_plot", height = "260px")
+          )
+        )
       )
     )
   }
@@ -483,6 +593,12 @@ server <- function(input, output, session) {
     sp_val  <- ps$SP
     as_val  <- ps$AS
 
+    pu      <- prov_uncertainty() %>% filter(province == rv$province)
+    tier    <- if (nrow(pu) > 0) pu$uncertainty_tier[1] else NULL
+    tier_color <- c(Low = "#4dac26", Medium = "#fc8d59", High = "#d73027")
+    tier_col   <- if (!is.null(tier) && tier %in% names(tier_color))
+                    tier_color[[tier]] else "#999"
+
     tagList(
       div(style = "text-align:center; margin:10px 0;",
         div(style = paste0("font-size:2.5rem; font-weight:700; color:",
@@ -492,7 +608,22 @@ server <- function(input, output, session) {
             paste("CGI Score (", sel_year(), ")")),
         span(class = "score-badge",
              style = paste0("background:", score_color(pmin(cgi_val, 1))),
-             score_label(pmin(cgi_val, 1)))
+             score_label(pmin(cgi_val, 1))),
+        if (!is.null(tier)) {
+          div(style = "margin-top:8px;",
+            tags$span(
+              style = paste0("display:inline-flex;align-items:center;gap:5px;",
+                             "font-size:0.78rem;color:#555;"),
+              tags$span(
+                style = paste0("display:inline-block;width:0;height:0;",
+                               "border-left:6px solid transparent;",
+                               "border-right:6px solid transparent;",
+                               "border-bottom:10px solid ", tier_col, ";"),
+              ),
+              paste(tier, "uncertainty")
+            )
+          )
+        }
       ),
       hr(),
       div(style = "font-size:0.85rem;",
@@ -669,6 +800,92 @@ server <- function(input, output, session) {
         uirevision = paste(rv$province, sel_year())
       ) %>%
       config(doubleClick = "reset", scrollZoom = FALSE, displayModeBar = TRUE)
+  })
+
+  output$uncertainty_plot <- renderPlotly({
+    req(rv$view == "pillar", !is.null(rv$province))
+    ps <- pillar_scores()
+    pu <- prov_uncertainty() %>% filter(province == rv$province)
+
+    tier       <- if (nrow(pu) > 0) pu$uncertainty_tier[1] else "Unknown"
+    tier_colors <- c(Low = "#4dac26", Medium = "#fc8d59", High = "#d73027", Unknown = "#999")
+    tier_col   <- tier_colors[[tier]]
+
+    cgi_lo <- if (nrow(pu) > 0) pu$CGI_lo90[1] else NA_real_
+    cgi_hi <- if (nrow(pu) > 0) pu$CGI_hi90[1] else NA_real_
+
+    metrics <- tibble(
+      label  = c("CGI (composite)", "Demand Pressure", "Supply Pressure", "Access Stress"),
+      value  = c(ps$CGI, ps$DP, ps$SP, ps$AS),
+      bar_color = c(tier_col, "#e66101", "#5e3c99", "#1a9641"),
+      err_hi = c(cgi_hi - ps$CGI, NA, NA, NA),
+      err_lo = c(ps$CGI - cgi_lo, NA, NA, NA),
+      hover  = c(
+        paste0("CGI: ", round(ps$CGI, 3),
+               if (nrow(pu) > 0)
+                 paste0("\n90% PI: [", round(cgi_lo, 3), ", ", round(cgi_hi, 3), "]",
+                        "\nPI width: ",  round(pu$PI_width[1], 3),
+                        "\nUncertainty: ", tier)
+               else "\n(no MC data)"),
+        paste0("Demand Pressure: ", round(ps$DP, 3)),
+        paste0("Supply Pressure: ", round(ps$SP, 3)),
+        paste0("Access Stress: ",   round(ps$AS, 3))
+      )
+    )
+
+    x_max <- max(c(metrics$value + replace(metrics$err_hi, is.na(metrics$err_hi), 0),
+                   CGI_THRESH_HIGH), na.rm = TRUE) * 1.12
+
+    plot_ly(
+      data        = metrics,
+      x           = ~value,
+      y           = ~label,
+      type        = "bar",
+      orientation = "h",
+      marker      = list(color = ~bar_color, line = list(color = "white", width = 1)),
+      error_x     = list(
+        type       = "data",
+        symmetric  = FALSE,
+        array      = ~err_hi,
+        arrayminus = ~err_lo,
+        color      = "#333",
+        thickness  = 2,
+        width      = 8
+      ),
+      text      = ~hover,
+      hoverinfo = "text",
+      showlegend = FALSE
+    ) %>%
+      layout(
+        shapes = list(list(
+          type = "line",
+          x0 = CGI_THRESH_HIGH, x1 = CGI_THRESH_HIGH,
+          y0 = -0.5, y1 = 3.5,
+          line = list(color = "#d73027", dash = "dash", width = 1.5)
+        )),
+        annotations = list(
+          list(x = CGI_THRESH_HIGH, y = 3.5, xref = "x", yref = "y",
+               text = paste0("Hotspot<br>", round(CGI_THRESH_HIGH, 2)),
+               showarrow = FALSE, font = list(size = 10, color = "#d73027"),
+               xanchor = "left", yanchor = "bottom"),
+          list(x = 0.01, y = 1.07, xref = "paper", yref = "paper",
+               text = paste0("<b>Uncertainty tier: <span style='color:", tier_col,
+                             "'>", tier, "</span></b>",
+                             if (nrow(pu) > 0)
+                               paste0(" &nbsp;|&nbsp; 90% PI: [",
+                                      round(cgi_lo, 3), ", ", round(cgi_hi, 3),
+                                      "]  width: ", round(pu$PI_width[1], 3))
+                             else ""),
+               showarrow = FALSE, font = list(size = 12), align = "left")
+        ),
+        xaxis = list(title = "Normalised score", range = c(0, x_max), zeroline = FALSE),
+        yaxis = list(title = "",
+                     categoryorder = "array",
+                     categoryarray = rev(metrics$label)),
+        margin    = list(l = 140, r = 20, t = 44, b = 50),
+        uirevision = paste(rv$province, sel_year(), input$sel_category %||% "All")
+      ) %>%
+      config(displayModeBar = FALSE)
   })
 
   # ════════════════════════════════════════════════════════════════════════════
