@@ -277,21 +277,41 @@ server <- function(input, output, session) {
   # VIEW 1: MAP
   # ════════════════════════════════════════════════════════════════════════════
   map_ui <- function() {
-    fluidRow(
-      column(8,
-        card(
-          card_header(paste("Care Gap Index —", sel_year(),
-                            "| Click a province to explore")),
-          leafletOutput("choropleth", height = "520px")
+    navset_tab(
+      nav_panel("Province Map",
+        fluidRow(
+          column(8,
+            card(
+              card_header(paste("Care Gap Index —", sel_year(),
+                                "| Click a province to explore")),
+              leafletOutput("choropleth", height = "520px")
+            )
+          ),
+          column(4,
+            card(
+              card_header("Province Rankings"),
+              div(style = "font-size:0.78rem; color:#666; padding:4px 10px 2px;",
+                  "Ranked by CGI score — 1 = highest care gap"),
+              div(style = "max-height:500px; overflow-y:auto;",
+                  uiOutput("prov_ranking"))
+            )
+          )
         )
       ),
-      column(4,
-        card(
-          card_header("Province Rankings"),
-          div(style = "font-size:0.78rem; color:#666; padding:4px 10px 2px;",
-              "Ranked by CGI score — 1 = highest care gap"),
-          div(style = "max-height:500px; overflow-y:auto;",
-              uiOutput("prov_ranking"))
+      nav_panel("Cell-Level Heatmap",
+        fluidRow(
+          column(12,
+            card(
+              card_header(paste(
+                "CGI by Province × Specialism —", sel_year(),
+                "| CGI > 0.66 = hotspot | Click a cell to explore province"
+              )),
+              p(style = "color:#666; font-size:0.85rem; padding:4px 16px 0;",
+                "Province rollup scores (map view) are volume-weighted averages that mask
+                 high-pressure specialism cells. This view shows the full cell-level picture."),
+              plotlyOutput("cell_heatmap", height = "680px")
+            )
+          )
         )
       )
     )
@@ -330,7 +350,7 @@ server <- function(input, output, session) {
         addLegend(
           pal      = pal,
           values   = ~CGI,
-          title    = paste0("CGI Score (", sel_year(), ")<br><small style='font-weight:normal'>0 = low gap &bull; 1+ = critical</small>"),
+          title    = paste0("CGI Score (", sel_year(), ")<br><small style='font-weight:normal'>0 = low gap &bull; 1 = critical</small>"),
           position = "bottomright",
           labFormat = labelFormat(digits = 2)
         )
@@ -365,7 +385,7 @@ server <- function(input, output, session) {
       addLegend(
         pal      = pal,
         values   = map_data$CGI,
-        title    = paste0("CGI Score (", sel_year(), ")<br><small style='font-weight:normal'>0 = low gap &bull; 1+ = critical</small>"),
+        title    = paste0("CGI Score (", sel_year(), ")<br><small style='font-weight:normal'>0 = low gap &bull; 1 = critical</small>"),
         position = "bottomright",
         labFormat = labelFormat(digits = 2)
       )
@@ -895,6 +915,89 @@ server <- function(input, output, session) {
       layout(showlegend = FALSE,
              uirevision = paste(rv$indicator, sel_year())) %>%
       config(doubleClick = "reset", displayModeBar = TRUE)
+  })
+
+  # ── Cell-level heatmap (all provinces × specialisms) ────────────────────────
+  output$cell_heatmap <- renderPlotly({
+    req(rv$view == "map")
+    d <- detail_yr() %>% select(province, category, CGI)
+
+    # Specialisms: highest mean CGI at top
+    cat_order <- d %>%
+      group_by(category) %>%
+      summarise(m = mean(CGI, na.rm = TRUE), .groups = "drop") %>%
+      arrange(m) %>% pull(category)
+
+    # Provinces: highest mean CGI on left
+    prov_order <- d %>%
+      group_by(province) %>%
+      summarise(m = mean(CGI, na.rm = TRUE), .groups = "drop") %>%
+      arrange(desc(m)) %>% pull(province)
+
+    # Build z matrix (rows = specialisms, cols = provinces)
+    z_mat <- matrix(NA_real_, nrow = length(cat_order), ncol = length(prov_order))
+    for (i in seq_along(cat_order))
+      for (j in seq_along(prov_order)) {
+        v <- d$CGI[d$category == cat_order[i] & d$province == prov_order[j]]
+        if (length(v)) z_mat[i, j] <- v[1]
+      }
+
+    # Hover text
+    hover <- matrix("", nrow = nrow(z_mat), ncol = ncol(z_mat))
+    for (i in seq_along(cat_order))
+      for (j in seq_along(prov_order)) {
+        v   <- z_mat[i, j]
+        hot <- !is.na(v) && v >= 0.66
+        hover[i, j] <- paste0(
+          prov_order[j], " \u00d7 ", cat_order[i],
+          "\nCGI: ", ifelse(is.na(v), "NA", round(v, 3)),
+          if (hot) "\n\u26a0 HOTSPOT" else ""
+        )
+      }
+
+    plot_ly(
+      x         = prov_order,
+      y         = cat_order,
+      z         = z_mat,
+      type      = "heatmap",
+      source    = "cell_heatmap_src",
+      colorscale = list(
+        list(0,    "#4dac26"),
+        list(0.33, "#fee08b"),
+        list(0.66, "#fc8d59"),
+        list(1,    "#d73027")
+      ),
+      zmin      = 0,
+      zmax      = 1,
+      text      = hover,
+      hoverinfo = "text",
+      colorbar  = list(
+        title    = "CGI",
+        tickvals = c(0, 0.33, 0.66, 1),
+        ticktext = c("0\nLow", "0.33\nModerate", "0.66\nHigh", "1\nCritical"),
+        len      = 0.6
+      )
+    ) %>%
+      layout(
+        xaxis = list(title = "", tickangle = -40,
+                     tickfont = list(size = 11), side = "bottom"),
+        yaxis = list(title = "", tickfont = list(size = 10)),
+        margin     = list(l = 220, t = 20, b = 120, r = 110),
+        uirevision = sel_year()
+      ) %>%
+      config(doubleClick = "reset", scrollZoom = FALSE, displayModeBar = TRUE) %>%
+      event_register("plotly_click")
+  })
+
+  observeEvent(event_data("plotly_click", source = "cell_heatmap_src"), {
+    click <- event_data("plotly_click", source = "cell_heatmap_src")
+    if (!is.null(click$x)) {
+      prov <- as.character(click$x)
+      if (prov %in% cgi_rollup$province) {
+        rv$province <- prov
+        rv$view     <- "pillar"
+      }
+    }
   })
 
   output$rootcause_specialism <- renderPlotly({

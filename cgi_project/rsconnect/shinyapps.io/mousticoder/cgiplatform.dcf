@@ -5,6 +5,6 @@ account: mousticoder
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 17449544
-bundleId: 12067555
+bundleId: 12067634
 url: https://mousticoder.shinyapps.io/cgiplatform/
 version: 1
