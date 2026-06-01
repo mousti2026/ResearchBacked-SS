@@ -1,10 +1,10 @@
-name: cgi-diagnostic
+name: cgiplatform
 title:
 username: mousticoder
 account: mousticoder
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
-appId: 17415894
-bundleId: 12041314
-url: https://mousticoder.shinyapps.io/cgi-diagnostic/
+appId: 17449544
+bundleId: 12067310
+url: https://mousticoder.shinyapps.io/cgiplatform/
 version: 1
