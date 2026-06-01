@@ -37,6 +37,12 @@ cgi_detail <- readRDS(file.path(processed_dir, "cgi.rds"))
 
 YEARS <- sort(unique(cgi_rollup$year))   # 2025, 2030, 2035
 
+# Empirical tercile thresholds from 2025 cell-level CGI distribution
+# (consistent with hotspot classification in 11_hotspots.R)
+cgi_2025_vals    <- cgi_detail$CGI[cgi_detail$year == 2025 & !is.na(cgi_detail$CGI)]
+CGI_THRESH_LOW   <- quantile(cgi_2025_vals, probs = 1/3)  # 33rd percentile
+CGI_THRESH_HIGH  <- quantile(cgi_2025_vals, probs = 2/3)  # 67th percentile (hotspot cutoff)
+
 # ── 2. Indicator metadata ─────────────────────────────────────────────────────
 ind_meta <- tibble::tribble(
   ~col,   ~label,                      ~pillar,  ~pillar_label,
@@ -85,19 +91,19 @@ prov_sf <- tryCatch({
 # ── 4. Color helpers ──────────────────────────────────────────────────────────
 score_color <- function(x) {
   case_when(
-    is.na(x)   ~ "#999999",
-    x >= 0.66  ~ "#d73027",
-    x >= 0.33  ~ "#fc8d59",
-    TRUE        ~ "#4dac26"
+    is.na(x)                ~ "#999999",
+    x >= CGI_THRESH_HIGH    ~ "#d73027",
+    x >= CGI_THRESH_LOW     ~ "#fc8d59",
+    TRUE                    ~ "#4dac26"
   )
 }
 
 score_label <- function(x) {
   case_when(
-    is.na(x)   ~ "No data",
-    x >= 0.66  ~ "High pressure",
-    x >= 0.33  ~ "Moderate",
-    TRUE        ~ "Low pressure"
+    is.na(x)                ~ "No data",
+    x >= CGI_THRESH_HIGH    ~ "High pressure",
+    x >= CGI_THRESH_LOW     ~ "Moderate",
+    TRUE                    ~ "Low pressure"
   )
 }
 
@@ -304,7 +310,7 @@ server <- function(input, output, session) {
             card(
               card_header(paste(
                 "CGI by Province × Specialism —", sel_year(),
-                "| CGI > 0.66 = hotspot | Click a cell to explore province"
+                "| CGI >", round(CGI_THRESH_HIGH, 2), "= hotspot (67th pct) | Click a cell to explore province"
               )),
               p(style = "color:#666; font-size:0.85rem; padding:4px 16px 0;",
                 "Province rollup scores (map view) are volume-weighted averages that mask
@@ -533,7 +539,7 @@ server <- function(input, output, session) {
                width = 0.5, alpha = 0.9) +
       geom_point(aes(y = nat), shape = 21, size = 4,
                  fill = "white", colour = "#333", stroke = 1.5) +
-      geom_hline(yintercept = 0.66, linetype = "dashed",
+      geom_hline(yintercept = CGI_THRESH_HIGH, linetype = "dashed",
                  colour = "#d73027", alpha = 0.6) +
       scale_fill_manual(
         values = c(DP = "#e66101", SP = "#5e3c99", AS = "#1a9641"),
@@ -544,7 +550,8 @@ server <- function(input, output, session) {
         labels = number_format(accuracy = 0.01)
       ) +
       labs(x = NULL, y = "Normalised score (values >1 valid at 2030/2035)",
-           caption = "White dot = national average | dashed = 0.66 threshold") +
+           caption = paste0("White dot = national average | dashed = hotspot threshold (",
+                            round(CGI_THRESH_HIGH, 2), " = 67th percentile, 2025)")) +
       theme_minimal(base_size = 13) +
       theme(panel.grid.minor = element_blank())
 
@@ -734,7 +741,7 @@ server <- function(input, output, session) {
       scale_fill_gradient2(low = "#4dac26", mid = "#fee08b", high = "#d73027",
                            midpoint = 0.5, limits = c(0, 1),
                            na.value = "#999", guide = "none") +
-      geom_hline(yintercept = 0.66, linetype = "dashed",
+      geom_hline(yintercept = CGI_THRESH_HIGH, linetype = "dashed",
                  colour = "#d73027", alpha = 0.5) +
       coord_flip() +
       scale_y_continuous(limits = c(0, max(y_max, 1.05)),
@@ -947,7 +954,7 @@ server <- function(input, output, session) {
     for (i in seq_along(cat_order))
       for (j in seq_along(prov_order)) {
         v   <- z_mat[i, j]
-        hot <- !is.na(v) && v >= 0.66
+        hot <- !is.na(v) && v >= CGI_THRESH_HIGH
         hover[i, j] <- paste0(
           prov_order[j], " \u00d7 ", cat_order[i],
           "\nCGI: ", ifelse(is.na(v), "NA", round(v, 3)),
@@ -973,8 +980,11 @@ server <- function(input, output, session) {
       hoverinfo = "text",
       colorbar  = list(
         title    = "CGI",
-        tickvals = c(0, 0.33, 0.66, 1),
-        ticktext = c("0\nLow", "0.33\nModerate", "0.66\nHigh", "1\nCritical"),
+        tickvals = c(0, CGI_THRESH_LOW, CGI_THRESH_HIGH, 1),
+        ticktext = c("0\nLow",
+                     paste0(round(CGI_THRESH_LOW, 2), "\nModerate"),
+                     paste0(round(CGI_THRESH_HIGH, 2), "\nHigh"),
+                     "1\nCritical"),
         len      = 0.6
       )
     ) %>%
