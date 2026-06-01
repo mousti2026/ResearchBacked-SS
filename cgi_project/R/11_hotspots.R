@@ -24,22 +24,26 @@ cgi           <- readRDS(file.path(PROCESSED_DIR, "cgi.rds"))
 cgi_intervals <- readRDS(file.path(PROCESSED_DIR, "cgi_intervals.rds"))
 cgi_rollup    <- readRDS(file.path(PROCESSED_DIR, "cgi_rollup.rds"))
 
-# ── Step 1: CGI threshold — fixed at 0.66 ─────────────────────────────────────
-# 0.66 corresponds to the upper tercile of a [0, 1] scale, consistent with the
-# normalization reference. Since indicators are unbounded above 1 in future years,
-# the fixed threshold ensures a stable, scale-anchored cutoff across all years.
+# ── Step 1: CGI threshold — 2025 empirical maximum ────────────────────────────
+# Since all indicators are clipped to [0,1], future CGI values are bounded by
+# the 2025 normalization ceiling. The 2025 empirical maximum is therefore the
+# most meaningful threshold: a cell is classified as a hotspot when its projected
+# CGI exceeds the worst case observed across any province × specialism in 2025.
+# This anchors the hotspot definition directly to observed baseline conditions
+# rather than an arbitrary point on the [0,1] scale.
 message("Computing hotspot thresholds...")
-
-CGI_THRESHOLD <- 0.66
-message("  CGI threshold (fixed): ", CGI_THRESHOLD)
 
 cgi_2025_vals <- cgi %>%
   filter(year == 2025, !is.na(CGI)) %>%
   pull(CGI)
+
+CGI_THRESHOLD <- max(cgi_2025_vals)
+message("  CGI threshold (2025 empirical max): ", round(CGI_THRESHOLD, 4))
 message("  CGI 2025 distribution: ",
         "p33=", round(quantile(cgi_2025_vals, 0.33), 3),
         " p66=", round(quantile(cgi_2025_vals, 0.66), 3),
-        " p90=", round(quantile(cgi_2025_vals, 0.90), 3))
+        " p90=", round(quantile(cgi_2025_vals, 0.90), 3),
+        " max=", round(CGI_THRESHOLD, 3))
 
 # ── Step 2: Join PI lower bound ────────────────────────────────────────────────
 hotspots <- cgi %>%
