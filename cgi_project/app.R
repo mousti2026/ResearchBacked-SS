@@ -37,11 +37,11 @@ cgi_detail <- readRDS(file.path(processed_dir, "cgi.rds"))
 
 YEARS <- sort(unique(cgi_rollup$year))   # 2025, 2030, 2035
 
-# Empirical tercile thresholds from 2025 cell-level CGI distribution
+# Tercile thresholds from 2025 province-level CGI distribution
 # (consistent with hotspot classification in 11_hotspots.R)
-cgi_2025_vals    <- cgi_detail$CGI[cgi_detail$year == 2025 & !is.na(cgi_detail$CGI)]
-CGI_THRESH_LOW   <- quantile(cgi_2025_vals, probs = 1/3)  # 33rd percentile
-CGI_THRESH_HIGH  <- quantile(cgi_2025_vals, probs = 2/3)  # 67th percentile (hotspot cutoff)
+cgi_2025_prov   <- cgi_rollup$CGI[cgi_rollup$year == 2025 & !is.na(cgi_rollup$CGI)]
+CGI_THRESH_LOW  <- quantile(cgi_2025_prov, probs = 1/3)  # 33rd percentile
+CGI_THRESH_HIGH <- quantile(cgi_2025_prov, probs = 2/3)  # 67th percentile (hotspot cutoff)
 
 # ── 2. Indicator metadata ─────────────────────────────────────────────────────
 ind_meta <- tibble::tribble(
