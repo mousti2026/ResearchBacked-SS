@@ -276,11 +276,56 @@ cor_check <- cgi_intervals %>%
   pull()
 message("  Spearman ρ (central vs MC mean, 2025): ", round(cor_check, 4))
 
+# ── Province-level MC rollup (for app uncertainty markers) ────────────────────
+message("Computing province-level MC rollup...")
+
+# DBC weights from 2025 point estimates
+dbc_weights <- cgi_central %>%
+  filter(year == YEAR_BASE) %>%
+  left_join(
+    readRDS(file.path(PROCESSED_DIR, "demand.rds")) %>%
+      filter(year == YEAR_BASE) %>%
+      select(province, category, expected_dbc),
+    by = c("province", "category")
+  ) %>%
+  group_by(province) %>%
+  mutate(w = expected_dbc / sum(expected_dbc, na.rm = TRUE)) %>%
+  ungroup() %>%
+  select(province, category, w)
+
+# Weighted province CGI per draw
+province_draws <- mc_results %>%
+  left_join(dbc_weights, by = c("province", "category")) %>%
+  filter(!is.na(CGI_d), !is.na(w)) %>%
+  group_by(province, year, draw) %>%
+  summarise(CGI_prov = sum(CGI_d * w), .groups = "drop")
+
+# Summarise into intervals + tier
+province_mc <- province_draws %>%
+  group_by(province, year) %>%
+  summarise(
+    CGI_mean = mean(CGI_prov,                    na.rm = TRUE),
+    CGI_lo90 = quantile(CGI_prov, probs = 0.05,  na.rm = TRUE),
+    CGI_hi90 = quantile(CGI_prov, probs = 0.95,  na.rm = TRUE),
+    CGI_sd   = sd(CGI_prov,                      na.rm = TRUE),
+    .groups  = "drop"
+  ) %>%
+  mutate(PI_width = CGI_hi90 - CGI_lo90) %>%
+  group_by(year) %>%
+  mutate(uncertainty_tier = case_when(
+    PI_width <= quantile(PI_width, 1/3) ~ "Low",
+    PI_width <= quantile(PI_width, 2/3) ~ "Medium",
+    TRUE                                ~ "High"
+  )) %>%
+  ungroup()
+
 # ── Save ───────────────────────────────────────────────────────────────────────
 saveRDS(mc_results,    file.path(PROCESSED_DIR, "mc_results.rds"))
 saveRDS(cgi_intervals, file.path(PROCESSED_DIR, "cgi_intervals.rds"))
+saveRDS(province_mc,   file.path(PROCESSED_DIR, "province_mc.rds"))
 
 message("\n=== 09_uncertainty.R complete ===")
 message("  mc_results.rds    : ", nrow(mc_results), " rows")
 message("  cgi_intervals.rds : ", nrow(cgi_intervals), " rows (province × category × year)")
+message("  province_mc.rds   : ", nrow(province_mc), " rows (province × year, for app uncertainty markers)")
 message("  90% PI computed; Spearman ρ(central, MC mean) = ", round(cor_check, 4))
