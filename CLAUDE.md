@@ -196,7 +196,7 @@ Min-max anchored to 2025 cross-sectional distribution (fixed reference):
 ```
 I_i*_{p,s,t} = (I_i_{p,s,t} - min_2025) / (max_2025 - min_2025)
 ```
-Values >1 or <0 in future years are valid and meaningful. Do NOT clip. If min = max (degenerate), set all to 0.5.
+All normalized indicator values are clipped to [0, 1]. If min = max (degenerate), set all to 0.5.
 
 ### Hotspot classification
 A cell (p,s) is a hotspot at year t if ALL THREE hold:
@@ -223,7 +223,7 @@ A cell (p,s) is a hotspot at year t if ALL THREE hold:
 - `SP1` division by zero: werkende = 0 → SP1 = NA, flag
 - Negative tekort: valid (surplus) — let normalization handle it, scores near 0
 - AS missing: CGI = (DP + SP) / 2, `incomplete = TRUE`
-- CGI > 1 in future years: expected, do NOT clip — it signals deterioration past 2025 worst case
+- CGI > 1 in future years: cannot occur — individual indicators are clipped to [0,1], so CGI is bounded to [0,1]
 
 ---
 
